@@ -43,6 +43,30 @@ wails3 build
 
 The output binary ends up under `bin/` (exact layout depends on your OS; the Taskfile uses `takeout-md-fixer` as the app name).
 
+
+
+## Release builds (local)
+
+From the repo root (macOS recommended for the DMG):
+
+```bash
+chmod +x scripts/build-release.sh
+./scripts/build-release.sh
+```
+
+This updates `build/config.yml` to the chosen version (set `VERSION=x.y.z` to override), runs `wails3 package`, builds a **DMG** on macOS, and cross-compiles **Windows amd64** `takeout-md-fixer.exe` into `bin/`.
+
+## Automated releases (GitHub Actions)
+
+On every push to `main` (for example after merging a PR), [`.github/workflows/release.yml`](.github/workflows/release.yml) runs using official GitHub Actions (`actions/checkout`, `actions/setup-go`, `actions/setup-node`, `actions/upload-artifact`, `actions/download-artifact`) and the GitHub CLI (`gh release create`) to:
+
+1. **Version**: next **patch** from the latest `v*.*.*` git tag (starts at `0.0.1` if no tags exist).
+2. **Changelog**: commit subjects since that tag, plus a link to the build commit.
+3. **Artifacts**: `takeout-md-fixer.dmg` (macOS) and `takeout-md-fixer.exe` (Windows amd64).
+4. **Publish**: a **GitHub Release** with those files attached.
+
+Workflows need **write** permission on **Actions** / **contents** (default `GITHUB_TOKEN` is enough for releases in the same repo).
+
 ## Open source
 
 This project is open source and free to use. If you want to say thanks, you can [buy me a coffee](https://www.buymeacoffee.com/mrdevx).
