@@ -7,13 +7,15 @@ import (
 	"strings"
 )
 
-// ScanFolder walks root recursively and lists media files with optional JSON sidecars.
+// ScanFolder walks root recursively and lists media files with optional JSON sidecars,
+// then counts JSON files that were not linked to any media (orphans), excluding known non-sidecar names.
 func ScanFolder(root string) (*ScanResult, error) {
 	if root == "" {
 		return nil, fmt.Errorf("no folder path provided")
 	}
 
 	result := &ScanResult{FolderPath: root}
+	linkedJSON := make(map[string]struct{})
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -43,6 +45,9 @@ func ScanFolder(root string) (*ScanResult, error) {
 			mf.JsonPath = jsonPath
 			mf.HasJson = true
 			result.WithJson++
+			if k := normalizePathKey(jsonPath); k != "" {
+				linkedJSON[k] = struct{}{}
+			}
 		} else {
 			result.WithoutJson++
 		}
@@ -55,5 +60,38 @@ func ScanFolder(root string) (*ScanResult, error) {
 		return nil, fmt.Errorf("error scanning folder: %w", err)
 	}
 
+	_ = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+		if strings.HasPrefix(info.Name(), "._") {
+			return nil
+		}
+		if !strings.HasSuffix(strings.ToLower(path), ".json") {
+			return nil
+		}
+		b := strings.ToLower(filepath.Base(path))
+		if b == "metadata.json" || b == "print-subscriptions.json" {
+			return nil
+		}
+		k := normalizePathKey(path)
+		if k == "" {
+			return nil
+		}
+		if _, ok := linkedJSON[k]; ok {
+			return nil
+		}
+		result.OrphanJson++
+		return nil
+	})
+
 	return result, nil
+}
+
+func normalizePathKey(p string) string {
+	abs, err := filepath.Abs(p)
+	if err != nil {
+		return ""
+	}
+	return strings.ToLower(filepath.Clean(abs))
 }

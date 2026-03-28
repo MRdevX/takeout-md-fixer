@@ -93,10 +93,15 @@ func (s *MetadataService) FixMetadata(folderPath string, deleteJsonSidecars bool
 		}
 
 		if deleteJsonSidecars && mf.JsonPath != "" {
-			if err := os.Remove(mf.JsonPath); err != nil {
-				result.JsonDeleteFailed++
-			} else {
-				result.JsonDeleted++
+			for _, p := range takeout.SidecarCleanupPaths(mf.Path, mf.JsonPath) {
+				if err := os.Remove(p); err != nil {
+					if os.IsNotExist(err) {
+						continue
+					}
+					result.JsonDeleteFailed++
+				} else {
+					result.JsonDeleted++
+				}
 			}
 		}
 
