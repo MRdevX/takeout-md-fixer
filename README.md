@@ -1,59 +1,56 @@
-# Welcome to Your New Wails3 Project!
+# Takeout Metadata Fixer
 
-Congratulations on generating your Wails3 application! This README will guide you through the next steps to get your project up and running.
+A small desktop app that reads the JSON sidecars Google Takeout ships next to your photos and videos, then writes the real dates and GPS (and related fields) back into the files using [ExifTool](https://exiftool.org/).
 
-## Getting Started
+**You need ExifTool installed** and available on your `PATH` (the app talks to it through a Go wrapper).
 
-1. Navigate to your project directory in the terminal.
+## Why I built this
 
-2. To run your application in development mode, use the following command:
+One day I wanted to move my photos and memories out of Google Photos and used Takeout. The files came out with metadata that didn’t match what I expected—so bringing them into iCloud or anywhere else felt wrong. I wrote this tool to put that metadata back where it belongs before importing.
 
-   ```
-   wails3 dev
-   ```
+## Tech stack
 
-   This will start your application and enable hot-reloading for both frontend and backend changes.
+- **Go** — backend and Wails service
+- **[Wails v3](https://v3.wails.io/)** — desktop shell, bindings to the UI
+- **Vite** + **vanilla JS** — frontend
+- **[go-exiftool](https://github.com/barasher/go-exiftool)** — talks to ExifTool
+- **[ExifTool](https://exiftool.org/)** — must be installed separately on your machine
 
-3. To build your application for production, use:
+## Prerequisites
 
-   ```
-   wails3 build
-   ```
+- [Go](https://go.dev/dl/) (see `go.mod` for the version this repo targets)
+- [Node.js](https://nodejs.org/) (for the frontend toolchain)
+- [Wails v3 CLI](https://v3.wails.io/) — e.g. `go install github.com/wailsapp/wails/v3/cmd/wails3@latest`
+- [ExifTool](https://exiftool.org/) on your `PATH`
 
-   This will create a production-ready executable in the `build` directory.
+## Run (development)
 
-## Exploring Wails3 Features
+From the project root:
 
-Now that you have your project set up, it's time to explore the features that Wails3 offers:
+```bash
+wails3 dev
+```
 
-1. **Check out the examples**: The best way to learn is by example. Visit the `examples` directory in the `v3/examples` directory to see various sample applications.
+That builds the frontend, generates bindings, and runs the app with hot reload. First run may install npm dependencies under `frontend/`.
 
-2. **Run an example**: To run any of the examples, navigate to the example's directory and use:
+## Build (production binary)
 
-   ```
-   go run .
-   ```
+From the project root:
 
-   Note: Some examples may be under development during the alpha phase.
+```bash
+wails3 build
+```
 
-3. **Explore the documentation**: Visit the [Wails3 documentation](https://v3.wails.io/) for in-depth guides and API references.
+The output binary ends up under `bin/` (exact layout depends on your OS; the Taskfile uses `takeout-md-fixer` as the app name).
 
-4. **Join the community**: Have questions or want to share your progress? Join the [Wails Discord](https://discord.gg/JDdSxwjhGf) or visit the [Wails discussions on GitHub](https://github.com/wailsapp/wails/discussions).
+## Open source
 
-## Project Structure
+This project is open source and free to use. If you want to say thanks, you can [buy me a coffee](https://www.buymeacoffee.com/mrdevx).
 
-Take a moment to familiarize yourself with your project structure:
+## Author
 
-- `frontend/`: Contains your frontend code (HTML, CSS, JavaScript/TypeScript)
-- `main.go`: The entry point of your Go backend
-- `app.go`: Define your application structure and methods here
-- `wails.json`: Configuration file for your Wails project
+**Mahdi Rashidi**
 
-## Next Steps
-
-1. Modify the frontend in the `frontend/` directory to create your desired UI.
-2. Add backend functionality in `main.go`.
-3. Use `wails3 dev` to see your changes in real-time.
-4. When ready, build your application with `wails3 build`.
-
-Happy coding with Wails3! If you encounter any issues or have questions, don't hesitate to consult the documentation or reach out to the Wails community.
+- Email: [contact@mrashidi.me](mailto:contact@mrashidi.me)
+- Site: [mrashidi.me](https://mrashidi.me)
+- GitHub: [@MRdevX](https://github.com/MRdevX)

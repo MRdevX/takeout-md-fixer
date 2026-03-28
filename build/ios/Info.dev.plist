@@ -7,7 +7,7 @@
 		<key>CFBundleExecutable</key>
 		<string>takeout-md-fixer</string>
 		<key>CFBundleGetInfoString</key>
-		<string>Google Takeout metadata fixer</string>
+		<string>Open-source Takeout metadata fixer — mrashidi.me</string>
 		<key>CFBundleIdentifier</key>
 		<string>io.github.takeout-md-fixer.app.dev</string>
 		<key>CFBundleName</key>
@@ -30,7 +30,7 @@
 			<true/>
 		</dict>
 		<key>NSHumanReadableCopyright</key>
-		<string>(c) 2026 takeout-md-fixer</string>
+		<string>(c) 2026 Mahdi Rashidi</string>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
 		<key>UIRequiredDeviceCapabilities</key>

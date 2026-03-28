@@ -8,7 +8,7 @@
     !define INFO_PROJECTNAME "takeout-md-fixer"
 !endif
 !ifndef INFO_COMPANYNAME
-    !define INFO_COMPANYNAME "takeout-md-fixer"
+    !define INFO_COMPANYNAME "Mahdi Rashidi"
 !endif
 !ifndef INFO_PRODUCTNAME
     !define INFO_PRODUCTNAME "Takeout Metadata Fixer"
@@ -17,7 +17,7 @@
     !define INFO_PRODUCTVERSION "0.0.1"
 !endif
 !ifndef INFO_COPYRIGHT
-    !define INFO_COPYRIGHT "(c) 2026 takeout-md-fixer"
+    !define INFO_COPYRIGHT "(c) 2026 Mahdi Rashidi"
 !endif
 !ifndef PRODUCT_EXECUTABLE
     !define PRODUCT_EXECUTABLE "${INFO_PROJECTNAME}.exe"

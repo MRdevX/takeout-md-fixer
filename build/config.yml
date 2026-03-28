@@ -5,12 +5,12 @@ version: '3'
 
 # This information is used to generate the build assets.
 info:
-  companyName: "takeout-md-fixer"
+  companyName: "Mahdi Rashidi"
   productName: "Takeout Metadata Fixer"
   productIdentifier: "io.github.takeout-md-fixer.app"
   description: "Apply Google Takeout JSON metadata to photos and videos with ExifTool"
-  copyright: "(c) 2026 takeout-md-fixer"
-  comments: "Google Takeout metadata fixer"
+  copyright: "(c) 2026 Mahdi Rashidi"
+  comments: "Open-source Takeout metadata fixer — mrashidi.me"
   version: "0.0.1"
   # cfBundleIconName: "appicon" # The macOS icon name in Assets.car icon bundles (optional)
   #                               # Should match the name of your .icon file without the extension

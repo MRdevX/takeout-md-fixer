@@ -1,4 +1,4 @@
-import { Events } from "@wailsio/runtime";
+import { Browser, Events } from "@wailsio/runtime";
 import { MetadataService } from "../bindings/takeout-md-fixer/internal/service";
 
 const views = {
@@ -15,6 +15,41 @@ function showView(name) {
 
 let currentPath = "";
 let scanData = null;
+
+const aboutModal = document.getElementById("about-modal");
+
+function openAbout() {
+    aboutModal.classList.add("open");
+    aboutModal.setAttribute("aria-hidden", "false");
+}
+
+function closeAbout() {
+    aboutModal.classList.remove("open");
+    aboutModal.setAttribute("aria-hidden", "true");
+}
+
+document.getElementById("btn-about").addEventListener("click", openAbout);
+document.getElementById("about-modal-close").addEventListener("click", closeAbout);
+aboutModal.querySelectorAll("[data-close-modal]").forEach((el) => {
+    el.addEventListener("click", closeAbout);
+});
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && aboutModal.classList.contains("open")) {
+        closeAbout();
+    }
+});
+
+
+// WebView often blocks default link navigation; open via OS browser / mail client.
+aboutModal.addEventListener("click", (e) => {
+    const a = e.target.closest("a");
+    if (!a || !aboutModal.contains(a)) return;
+    const href = a.getAttribute("href");
+    if (!href || href.startsWith("#")) return;
+    e.preventDefault();
+    e.stopPropagation();
+    Browser.OpenURL(href);
+});
 
 document.getElementById("btn-select").addEventListener("click", async () => {
     try {
