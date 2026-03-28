@@ -158,6 +158,15 @@ jobs:
           cd build
           wails3 update build-assets -name takeout-md-fixer -binaryname takeout-md-fixer -config config.yml -dir .
 
+      # main.go embeds frontend/dist; wails3 package does this on macOS — Windows must build it explicitly.
+      - name: Generate bindings and build frontend
+        run: |
+          set -euo pipefail
+          wails3 generate bindings -f '-tags production -trimpath -buildvcs=false -ldflags="-w -s"' -clean=true
+          cd frontend
+          npm ci
+          npm run build
+
       - name: Generate syso and build Windows exe
         run: |
           set -euo pipefail
