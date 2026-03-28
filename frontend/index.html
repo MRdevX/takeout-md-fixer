@@ -2,32 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <link rel="icon" type="image/svg+xml" href="/wails.png"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="/style.css"/>
-    <title>Wails App</title>
+    <title>Takeout Metadata Fixer</title>
 </head>
 <body>
-<div class="container">
-    <div>
-        <a data-wml-openURL="https://wails.io">
-            <img src="/wails.png" class="logo" alt="Wails logo"/>
-        </a>
-        <a data-wml-openURL="https://developer.mozilla.org/en-US/docs/Web/JavaScript">
-            <img src="/javascript.svg" class="logo vanilla" alt="JavaScript logo"/>
-        </a>
-    </div>
-    <h1>Wails + Javascript</h1>
-    <div class="card">
-        <div aria-label="result" class="result" id="result">Please enter your name below 👇</div>
-        <div class="input-box" id="input">
-            <input aria-label="input" class="input" id="name" type="text" autocomplete="off"/>
-            <button aria-label="greet-btn" class="btn" onclick="doGreet()">Greet</button>
+<div id="app">
+    <!-- Welcome View -->
+    <div id="view-welcome" class="view active">
+        <div class="hero">
+            <h1>Takeout Metadata Fixer</h1>
+            <p class="subtitle">Restore timestamps and GPS data from Google Takeout JSON files back into your photos and videos.</p>
+            <button id="btn-select" class="btn btn-primary">Select Folder</button>
         </div>
     </div>
-    <div class="footer">
-        <div><p>Click on the Wails logo to learn more</p></div>
-        <div><p id="time">Listening for Time event...</p></div>
+
+    <!-- Scan Results View -->
+    <div id="view-scan" class="view">
+        <div class="header-bar">
+            <h2>Scan Results</h2>
+            <button id="btn-back" class="btn btn-ghost">← Back</button>
+        </div>
+        <div id="scan-path" class="folder-path"></div>
+        <div class="stats-row">
+            <div class="stat-card">
+                <span class="stat-value" id="stat-total">0</span>
+                <span class="stat-label">Total Files</span>
+            </div>
+            <div class="stat-card stat-ok">
+                <span class="stat-value" id="stat-matched">0</span>
+                <span class="stat-label">With JSON</span>
+            </div>
+            <div class="stat-card stat-warn">
+                <span class="stat-value" id="stat-unmatched">0</span>
+                <span class="stat-label">No JSON</span>
+            </div>
+        </div>
+        <div class="actions">
+            <button id="btn-fix" class="btn btn-primary">Fix Metadata</button>
+        </div>
+        <div class="file-list-container">
+            <table class="file-list">
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>JSON</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="file-list-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Processing View -->
+    <div id="view-processing" class="view">
+        <div class="processing-content">
+            <h2>Fixing Metadata...</h2>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-info">
+                <span id="progress-text">0 / 0</span>
+            </div>
+            <div id="progress-file" class="progress-file"></div>
+        </div>
+    </div>
+
+    <!-- Done View -->
+    <div id="view-done" class="view">
+        <div class="hero">
+            <h2>Done</h2>
+            <div class="stats-row">
+                <div class="stat-card stat-ok">
+                    <span class="stat-value" id="result-success">0</span>
+                    <span class="stat-label">Success</span>
+                </div>
+                <div class="stat-card stat-warn">
+                    <span class="stat-value" id="result-skipped">0</span>
+                    <span class="stat-label">Skipped</span>
+                </div>
+                <div class="stat-card stat-err">
+                    <span class="stat-value" id="result-failed">0</span>
+                    <span class="stat-label">Failed</span>
+                </div>
+            </div>
+            <button id="btn-restart" class="btn btn-primary">Start Over</button>
+        </div>
     </div>
 </div>
 <script type="module" src="/src/main.js"></script>

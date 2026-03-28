@@ -1,8 +1,11 @@
-module changeme
+module takeout-md-fixer
 
 go 1.25
 
-require github.com/wailsapp/wails/v3 v3.0.0-alpha.74
+require (
+	github.com/barasher/go-exiftool v1.10.0
+	github.com/wailsapp/wails/v3 v3.0.0-alpha.74
+)
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
