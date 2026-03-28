@@ -61,7 +61,7 @@ jobs:
           cat changelog.md
 
       - name: Upload release notes
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: release-notes
           path: changelog.md
@@ -76,9 +76,9 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
@@ -114,7 +114,7 @@ jobs:
           hdiutil create -volname "Takeout Metadata Fixer" -srcfolder "${STAGE}" -ov -format UDZO bin/takeout-md-fixer.dmg
 
       - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: macos
           path: |
@@ -134,9 +134,9 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
@@ -168,7 +168,7 @@ jobs:
           rm -f wails_windows_amd64.syso
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: windows
           path: bin/takeout-md-fixer.exe
@@ -178,19 +178,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download release notes
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: release-notes
           path: notes
 
       - name: Download macOS artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: macos
           path: dist/macos
 
       - name: Download Windows artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: windows
           path: dist/windows
