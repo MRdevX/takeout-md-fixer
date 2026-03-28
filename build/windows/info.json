@@ -5,11 +5,11 @@
 	"info": {
 		"0000": {
 			"ProductVersion": "0.0.1",
-			"CompanyName": "takeout-md-fixer",
+			"CompanyName": "Mahdi Rashidi",
 			"FileDescription": "Apply Google Takeout JSON metadata to photos and videos with ExifTool",
-			"LegalCopyright": "(c) 2026 takeout-md-fixer",
+			"LegalCopyright": "(c) 2026 Mahdi Rashidi",
 			"ProductName": "Takeout Metadata Fixer",
-			"Comments": "Google Takeout metadata fixer"
+			"Comments": "Open-source Takeout metadata fixer — mrashidi.me"
 		}
 	}
 }
