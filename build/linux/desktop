@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=My Product
+Comment=A takeout-md-fixer application
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/takeout-md-fixer %u
+Terminal=false
+Type=Application
+Icon=takeout-md-fixer
+Categories=Utility;
+StartupWMClass=takeout-md-fixer
+
+ 
