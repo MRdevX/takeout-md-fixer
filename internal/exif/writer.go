@@ -1,4 +1,4 @@
-package main
+package exif
 
 import (
 	"fmt"
@@ -9,27 +9,33 @@ import (
 	"time"
 
 	exiftool "github.com/barasher/go-exiftool"
+
+	"takeout-md-fixer/internal/takeout"
 )
 
-type ExifWriter struct {
+// Writer applies Takeout metadata to media files via ExifTool.
+type Writer struct {
 	et *exiftool.Exiftool
 }
 
-func NewExifWriter() (*ExifWriter, error) {
+// NewWriter starts an ExifTool session. Caller must Close when done.
+func NewWriter() (*Writer, error) {
 	et, err := exiftool.NewExiftool()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize exiftool (is it installed?): %w", err)
 	}
-	return &ExifWriter{et: et}, nil
+	return &Writer{et: et}, nil
 }
 
-func (w *ExifWriter) Close() {
+// Close releases ExifTool resources.
+func (w *Writer) Close() {
 	if w.et != nil {
 		w.et.Close()
 	}
 }
 
-func (w *ExifWriter) WriteMetadata(mediaPath string, meta *TakeoutMeta) error {
+// WriteMetadata writes EXIF/GPS and related tags from meta into mediaPath.
+func (w *Writer) WriteMetadata(mediaPath string, meta *takeout.TakeoutMeta) error {
 	fi := exiftool.FileMetadata{
 		File:   mediaPath,
 		Fields: make(map[string]interface{}),
@@ -46,7 +52,6 @@ func (w *ExifWriter) WriteMetadata(mediaPath string, meta *TakeoutMeta) error {
 			fi.SetString("DateTimeOriginal", dateStr)
 			fi.SetString("CreateDate", dateStr)
 			fi.SetString("ModifyDate", dateStr)
-			// Filesystem-facing tags (ExifTool updates metadata; also used with -overwrite_original)
 			fi.SetString("FileModifyDate", dateStr)
 			fi.SetString("FileCreateDate", dateStr)
 		}
@@ -76,7 +81,6 @@ func (w *ExifWriter) WriteMetadata(mediaPath string, meta *TakeoutMeta) error {
 		fi.SetString("ImageDescription", meta.Description)
 	}
 
-	// QuickTime container dates for video (Finder / players often read these)
 	ext := strings.ToLower(filepath.Ext(mediaPath))
 	if hasPhotoTime && (ext == ".mp4" || ext == ".mov" || ext == ".m4v" || ext == ".3gp") {
 		dateStr := photoTime.Format("2006:01:02 15:04:05")
@@ -92,7 +96,6 @@ func (w *ExifWriter) WriteMetadata(mediaPath string, meta *TakeoutMeta) error {
 		return fmt.Errorf("error writing metadata to %s: %w", mediaPath, batch[0].Err)
 	}
 
-	// OS-level access and modification time (what most file managers show as "modified")
 	if hasPhotoTime {
 		if err := os.Chtimes(mediaPath, photoTime, photoTime); err != nil {
 			return fmt.Errorf("metadata written but could not set file timestamps: %w", err)

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
-Name=My Product
-Comment=A takeout-md-fixer application
+Name=Takeout Metadata Fixer
+Comment=Apply Google Takeout JSON metadata to photos and videos with ExifTool
 # The Exec line includes %u to pass the URL to the application
 Exec=/usr/local/bin/takeout-md-fixer %u
 Terminal=false

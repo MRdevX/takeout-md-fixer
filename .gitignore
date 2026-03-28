@@ -1,4 +1,5 @@
 .task
+.cursor/debug-*.log
 bin
 frontend/dist
 frontend/node_modules

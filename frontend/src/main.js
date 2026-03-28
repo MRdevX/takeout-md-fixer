@@ -1,5 +1,5 @@
 import { Events } from "@wailsio/runtime";
-import { MetadataService } from "../bindings/takeout-md-fixer";
+import { MetadataService } from "../bindings/takeout-md-fixer/internal/service";
 
 const views = {
     welcome: document.getElementById("view-welcome"),

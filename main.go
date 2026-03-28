@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+
+	"takeout-md-fixer/internal/service"
 )
 
 //go:embed all:frontend/dist
@@ -15,7 +17,7 @@ func main() {
 		Name:        "Takeout Metadata Fixer",
 		Description: "Fix metadata on Google Takeout media files",
 		Services: []application.Service{
-			application.NewService(&MetadataService{}),
+			application.NewService(&service.MetadataService{}),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
