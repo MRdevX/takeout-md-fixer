@@ -20,7 +20,7 @@ import * as takeout$0 from "../takeout/models.js";
 import * as $models from "./models.js";
 
 /**
- * ExiftoolCheck reports whether ExifTool is available on PATH (or TAKEOUT_EXIFTOOL_PATH).
+ * ExiftoolCheck reports whether ExifTool is available (PATH plus common install locations).
  * @returns {$CancellablePromise<$models.ExiftoolStatus>}
  */
 export function ExiftoolCheck() {

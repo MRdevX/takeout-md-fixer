@@ -19,7 +19,7 @@ type ExiftoolStatus struct {
 	Path    string `json:"path,omitempty"`
 }
 
-// ExiftoolCheck reports whether ExifTool is available on PATH (or TAKEOUT_EXIFTOOL_PATH).
+// ExiftoolCheck reports whether ExifTool is available (PATH plus common install locations).
 func (s *MetadataService) ExiftoolCheck() ExiftoolStatus {
 	path, err := exif.ResolveExiftoolPath()
 	if err != nil {

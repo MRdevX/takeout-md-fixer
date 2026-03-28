@@ -1,6 +1,11 @@
 import { Browser, Events } from "@wailsio/runtime";
 import { MetadataService } from "../bindings/takeout-md-fixer/internal/service";
 
+// macOS: keep custom top bar below traffic lights (see main.go InvisibleTitleBarHeight).
+if (typeof navigator !== "undefined" && navigator.userAgent.includes("Macintosh")) {
+    document.documentElement.classList.add("platform-macos");
+}
+
 const views = {
     welcome: document.getElementById("view-welcome"),
     scan: document.getElementById("view-scan"),
@@ -8,14 +13,19 @@ const views = {
     done: document.getElementById("view-done"),
 };
 
+const btnBack = document.getElementById("btn-back");
+
 function showView(name) {
     Object.values(views).forEach((v) => v.classList.remove("active"));
     views[name].classList.add("active");
+    const onScan = name === "scan";
+    btnBack.hidden = !onScan;
+    btnBack.setAttribute("aria-hidden", onScan ? "false" : "true");
 }
 
 let currentPath = "";
 let scanData = null;
-/** Whether ExifTool was found on PATH (or TAKEOUT_EXIFTOOL_PATH). */
+/** Whether ExifTool was found (PATH plus common install locations). */
 let exiftoolOk = true;
 
 const aboutModal = document.getElementById("about-modal");
@@ -105,7 +115,7 @@ document.getElementById("btn-select").addEventListener("click", async () => {
     }
 });
 
-document.getElementById("btn-back").addEventListener("click", () => {
+btnBack.addEventListener("click", () => {
     showView("welcome");
 });
 

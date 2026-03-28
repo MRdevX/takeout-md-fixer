@@ -4,7 +4,7 @@
 
 [![Go](https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev/) [![Wails](https://img.shields.io/badge/Wails_v3-27272a?style=flat-square&logo=wails&logoColor=white)](https://v3.wails.io/) [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/) [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](https://developer.mozilla.org/docs/Web/JavaScript) [![ExifTool](https://img.shields.io/badge/ExifTool-system-8B4513?style=flat-square)](https://exiftool.org/)
 
-**You need [ExifTool](https://exiftool.org/) on your `PATH`.** The app checks on startup. Non-standard install? Set `TAKEOUT_EXIFTOOL_PATH` to `exiftool` or `exiftool.exe` (Windows).
+**You need [ExifTool](https://exiftool.org/).** The app resolves it via `PATH` plus common install locations (e.g. Homebrew and `/usr/local/bin` on macOS), because GUI apps often do not inherit your shell `PATH`.
 
 ## Why I built this
 
@@ -17,7 +17,7 @@ Stack: Go, [Wails v3](https://v3.wails.io/), [Vite](https://vitejs.dev/) + vanil
 - [Go](https://go.dev/dl/) ([`go.mod`](go.mod))
 - [Node.js](https://nodejs.org/)
 - [Wails v3 CLI](https://v3.wails.io/) (`go install github.com/wailsapp/wails/v3/cmd/wails3@latest`)
-- [ExifTool](https://exiftool.org/) on `PATH` or `TAKEOUT_EXIFTOOL_PATH`
+- [ExifTool](https://exiftool.org/) (see above)
 
 ## Develop
 

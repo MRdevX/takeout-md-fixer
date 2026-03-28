@@ -9,6 +9,8 @@
 <body>
 <div id="app">
     <header class="app-topbar">
+        <button type="button" id="btn-back" class="about-link" hidden aria-hidden="true">← Back</button>
+        <span class="app-topbar-fill" aria-hidden="true"></span>
         <button type="button" id="btn-about" class="about-link">About</button>
     </header>
 
@@ -29,7 +31,6 @@
     <div id="view-scan" class="view">
         <div class="header-bar">
             <h2>Scan results</h2>
-            <button id="btn-back" class="btn btn-ghost">← Back</button>
         </div>
         <div id="scan-path" class="folder-path"></div>
         <div class="stats-row">
