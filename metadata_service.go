@@ -61,10 +61,12 @@ type FixProgress struct {
 }
 
 type FixResult struct {
-	Total   int `json:"total"`
-	Success int `json:"success"`
-	Failed  int `json:"failed"`
-	Skipped int `json:"skipped"`
+	Total            int `json:"total"`
+	Success          int `json:"success"`
+	Failed           int `json:"failed"`
+	Skipped          int `json:"skipped"`
+	JsonDeleted      int `json:"jsonDeleted"`
+	JsonDeleteFailed int `json:"jsonDeleteFailed"`
 }
 
 type MetadataService struct{}
@@ -164,7 +166,7 @@ func findJsonSidecar(mediaPath string) string {
 	return ""
 }
 
-func (s *MetadataService) FixMetadata(folderPath string) (*FixResult, error) {
+func (s *MetadataService) FixMetadata(folderPath string, deleteJsonSidecars bool) (*FixResult, error) {
 	scanResult, err := s.ScanFolder(folderPath)
 	if err != nil {
 		return nil, err
@@ -206,6 +208,14 @@ func (s *MetadataService) FixMetadata(folderPath string) (*FixResult, error) {
 			result.Failed++
 			app.Event.Emit("fix-progress", progress)
 			continue
+		}
+
+		if deleteJsonSidecars && mf.JsonPath != "" {
+			if err := os.Remove(mf.JsonPath); err != nil {
+				result.JsonDeleteFailed++
+			} else {
+				result.JsonDeleted++
+			}
 		}
 
 		progress.Status = "success"

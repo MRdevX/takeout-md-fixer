@@ -40,6 +40,20 @@ export class FixResult {
              */
             this["skipped"] = 0;
         }
+        if (!("jsonDeleted" in $$source)) {
+            /**
+             * @member
+             * @type {number}
+             */
+            this["jsonDeleted"] = 0;
+        }
+        if (!("jsonDeleteFailed" in $$source)) {
+            /**
+             * @member
+             * @type {number}
+             */
+            this["jsonDeleteFailed"] = 0;
+        }
 
         Object.assign(this, $$source);
     }

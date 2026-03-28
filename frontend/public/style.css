@@ -170,6 +170,41 @@ h2 {
 
 .actions {
     margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 520px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-row input {
+    margin-top: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.done-extra {
+    margin-top: 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 420px;
+}
+
+.done-extra.hidden {
+    display: none;
 }
 
 /* File List */

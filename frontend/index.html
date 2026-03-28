@@ -39,6 +39,10 @@
             </div>
         </div>
         <div class="actions">
+            <label class="checkbox-row">
+                <input type="checkbox" id="chk-delete-json"/>
+                <span>Delete JSON sidecar files after a successful fix (only for files that were updated)</span>
+            </label>
             <button id="btn-fix" class="btn btn-primary">Fix Metadata</button>
         </div>
         <div class="file-list-container">
@@ -87,6 +91,7 @@
                     <span class="stat-label">Failed</span>
                 </div>
             </div>
+            <p id="result-json-delete" class="done-extra hidden"></p>
             <button id="btn-restart" class="btn btn-primary">Start Over</button>
         </div>
     </div>

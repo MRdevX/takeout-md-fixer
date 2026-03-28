@@ -12,10 +12,11 @@ import * as $models from "./models.js";
 
 /**
  * @param {string} folderPath
+ * @param {boolean} deleteJsonSidecars
  * @returns {$CancellablePromise<$models.FixResult | null>}
  */
-export function FixMetadata(folderPath) {
-    return $Call.ByID(2033193994, folderPath).then(/** @type {($result: any) => any} */(($result) => {
+export function FixMetadata(folderPath, deleteJsonSidecars) {
+    return $Call.ByID(2033193994, folderPath, deleteJsonSidecars).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType1($result);
     }));
 }

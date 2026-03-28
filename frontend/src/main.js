@@ -51,7 +51,8 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
     document.getElementById("progress-file").textContent = "";
 
     try {
-        const result = await MetadataService.FixMetadata(currentPath);
+        const deleteJson = document.getElementById("chk-delete-json").checked;
+        const result = await MetadataService.FixMetadata(currentPath, deleteJson);
         renderDoneResults(result);
         showView("done");
     } catch (err) {
@@ -104,6 +105,22 @@ function renderDoneResults(result) {
     document.getElementById("result-success").textContent = result.success;
     document.getElementById("result-skipped").textContent = result.skipped;
     document.getElementById("result-failed").textContent = result.failed;
+
+    const extra = document.getElementById("result-json-delete");
+    const parts = [];
+    if (result.jsonDeleted > 0) {
+        parts.push(`Sidecars removed: ${result.jsonDeleted}`);
+    }
+    if (result.jsonDeleteFailed > 0) {
+        parts.push(`Could not remove: ${result.jsonDeleteFailed}`);
+    }
+    if (parts.length > 0) {
+        extra.textContent = parts.join(" · ");
+        extra.classList.remove("hidden");
+    } else {
+        extra.textContent = "";
+        extra.classList.add("hidden");
+    }
 }
 
 function escapeHtml(str) {
