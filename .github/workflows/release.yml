@@ -1,0 +1,210 @@
+# On each push to main (e.g. after merging a PR), bump patch version from the latest v* tag,
+# build macOS (.app + DMG) and Windows (.exe), and publish a GitHub Release with a changelog
+# from commit subjects since that tag.
+
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Compute version
+        id: meta
+        run: |
+          set -euo pipefail
+          chmod +x scripts/lib/release-common.sh
+          # shellcheck disable=SC1091
+          source scripts/lib/release-common.sh
+          VER="$(next_release_version)"
+          echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${VER}" >> "$GITHUB_OUTPUT"
+
+      - name: Write changelog
+        run: |
+          set -euo pipefail
+          chmod +x scripts/lib/release-common.sh
+          # shellcheck disable=SC1091
+          source scripts/lib/release-common.sh
+          {
+            echo "## Changes"
+            echo ""
+            LOG="$(changelog_since_last_release || true)"
+            if [[ -z "${LOG// /}" ]]; then
+              echo "- (no new commits since last tag)"
+            else
+              echo "${LOG}"
+            fi
+            echo ""
+            echo "Built from [\`${GITHUB_SHA:0:7}\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})."
+          } > changelog.md
+          cat changelog.md
+
+      - name: Upload release notes
+        uses: actions/upload-artifact@v5
+        with:
+          name: release-notes
+          path: changelog.md
+
+  build-macos:
+    needs: version
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Wails v3
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+
+      - name: Add Go bin to PATH
+        run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Apply version and update build assets
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/lib/release-common.sh
+          # shellcheck disable=SC1091
+          source scripts/lib/release-common.sh
+          apply_version_to_config "${GITHUB_WORKSPACE}" "${VERSION}"
+          cd build
+          wails3 update build-assets -name takeout-md-fixer -binaryname takeout-md-fixer -config config.yml -dir .
+
+      - name: Package (macOS)
+        run: wails3 package
+
+      - name: Create DMG
+        run: |
+          set -euo pipefail
+          STAGE="${RUNNER_TEMP}/dmg-staging"
+          rm -rf "${STAGE}"
+          mkdir -p "${STAGE}"
+          cp -R bin/takeout-md-fixer.app "${STAGE}/"
+          ln -sf /Applications "${STAGE}/Applications"
+          hdiutil create -volname "Takeout Metadata Fixer" -srcfolder "${STAGE}" -ov -format UDZO bin/takeout-md-fixer.dmg
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: macos
+          path: |
+            bin/takeout-md-fixer.dmg
+            bin/takeout-md-fixer.app
+
+  build-windows:
+    needs: version
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Wails v3
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+
+      - name: Add Go bin to PATH
+        run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Apply version and update build assets
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/lib/release-common.sh
+          # shellcheck disable=SC1091
+          source scripts/lib/release-common.sh
+          apply_version_to_config "${GITHUB_WORKSPACE}" "${VERSION}"
+          cd build
+          wails3 update build-assets -name takeout-md-fixer -binaryname takeout-md-fixer -config config.yml -dir .
+
+      - name: Generate syso and build Windows exe
+        run: |
+          set -euo pipefail
+          cd build
+          wails3 generate syso -arch amd64 -icon windows/icon.ico -manifest windows/wails.exe.manifest -info windows/info.json -out ../wails_windows_amd64.syso
+          cd ..
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -tags production -trimpath -buildvcs=false -ldflags="-w -s -H windowsgui" -o bin/takeout-md-fixer.exe .
+          rm -f wails_windows_amd64.syso
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: windows
+          path: bin/takeout-md-fixer.exe
+
+  publish:
+    needs: [version, build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release notes
+        uses: actions/download-artifact@v5
+        with:
+          name: release-notes
+          path: notes
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: macos
+          path: dist/macos
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: windows
+          path: dist/windows
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p upload
+          cp "dist/macos/takeout-md-fixer.dmg" "upload/"
+          cp "dist/windows/takeout-md-fixer.exe" "upload/"
+          gh release create "${{ needs.version.outputs.tag }}" \
+            --title "Takeout Metadata Fixer ${{ needs.version.outputs.version }}" \
+            --notes-file "notes/changelog.md" \
+            upload/takeout-md-fixer.dmg \
+            upload/takeout-md-fixer.exe
