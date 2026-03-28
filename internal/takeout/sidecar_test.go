@@ -177,6 +177,27 @@ func TestSidecarPath_editedOwnSidecarTakesPrecedence(t *testing.T) {
 	}
 }
 
+func TestSidecarCleanupPaths_includesSupplementalSibling(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	media := filepath.Join(dir, "IMG_0452.JPG")
+	jpgJSON := filepath.Join(dir, "IMG_0452.JPG.json")
+	sup := filepath.Join(dir, "IMG_0452.JPG.supplemental-metadata.json")
+	paths := SidecarCleanupPaths(media, jpgJSON)
+	var hasJpg, hasSup bool
+	for _, p := range paths {
+		if filepath.Clean(p) == filepath.Clean(jpgJSON) {
+			hasJpg = true
+		}
+		if filepath.Clean(p) == filepath.Clean(sup) {
+			hasSup = true
+		}
+	}
+	if !hasJpg || !hasSup {
+		t.Fatalf("cleanup paths should include both .jpg.json and supplemental: %#v", paths)
+	}
+}
+
 func TestSidecarPath_editedCaseInsensitiveSuffix(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()

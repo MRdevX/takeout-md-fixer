@@ -109,6 +109,64 @@ func editedOriginalStem(nameNoExt string) (string, bool) {
 	return nameNoExt[:i], true
 }
 
+// SidecarCleanupPaths lists every path that may contain Takeout metadata for this media file.
+// Google often ships both IMG_0452.JPG.json and IMG_0452.JPG.supplemental-metadata.json; SidecarPath
+// only returns the first match, so deletion must remove all siblings.
+func SidecarCleanupPaths(mediaPath, resolvedJsonPath string) []string {
+	dir := filepath.Dir(mediaPath)
+	base := filepath.Base(mediaPath)
+	ext := filepath.Ext(base)
+	nameNoExt := strings.TrimSuffix(base, ext)
+
+	seen := make(map[string]bool)
+	var out []string
+	add := func(p string) {
+		if p == "" {
+			return
+		}
+		p = filepath.Clean(p)
+		if seen[p] {
+			return
+		}
+		seen[p] = true
+		out = append(out, p)
+	}
+
+	add(resolvedJsonPath)
+	add(mediaPath + ".json")
+	add(mediaPath + ".supplemental-metadata.json")
+	add(filepath.Join(dir, nameNoExt+".json"))
+	if utf8.RuneCountInString(base) >= longBasenameRunes {
+		add(filepath.Join(dir, prefixRunes(base, takeoutBasenameTruncateRunes)+".json"))
+	}
+	if idx := strings.LastIndex(nameNoExt, "("); idx > 0 {
+		suffix := nameNoExt[idx:]
+		if strings.HasSuffix(suffix, ")") {
+			originalName := nameNoExt[:idx]
+			add(filepath.Join(dir, originalName+".json"))
+			add(filepath.Join(dir, originalName+ext+suffix+".json"))
+		}
+	}
+	if p := sidecarSupplementalFromDir(dir, base); p != "" {
+		add(p)
+	}
+	if stem, ok := editedOriginalStem(nameNoExt); ok {
+		origPath := filepath.Join(dir, stem+ext)
+		if origPath != mediaPath {
+			origBase := filepath.Base(origPath)
+			origNameNoExt := strings.TrimSuffix(origBase, ext)
+			add(origPath + ".json")
+			add(origPath + ".supplemental-metadata.json")
+			add(filepath.Join(dir, origNameNoExt+".json"))
+			if p := sidecarSupplementalFromDir(dir, origBase); p != "" {
+				add(p)
+			}
+		}
+	}
+
+	return out
+}
+
 // sidecarSupplementalFromDir matches truncated supplemental-metadata filenames, e.g.
 // verylong….jpg.supplemental-metad.json (Google truncates the suffix after ~46 chars).
 func sidecarSupplementalFromDir(dir, base string) string {
