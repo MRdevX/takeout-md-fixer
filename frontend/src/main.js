@@ -15,7 +15,7 @@ function showView(name) {
 
 let currentPath = "";
 let scanData = null;
-/** Whether ExifTool was found on PATH (or TAKEOUT_EXIFTOOL_PATH). */
+/** Whether ExifTool was found (PATH plus common install locations). */
 let exiftoolOk = true;
 
 const aboutModal = document.getElementById("about-modal");
