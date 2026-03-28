@@ -40,6 +40,8 @@ func statOK(path string) bool {
 //     a. dir + stem + ".json" — e.g. IMG(1).jpg → IMG.json
 //     b. dir + stem + ext + "(n)" + ".json" — e.g. IMG.jpg(1).json
 //  6. Directory scan: truncated supplemental sidecars (*.supplemental*.json)
+//  7. Google Photos edited export: IMG_0378-edited.JPG uses the same metadata as IMG_0378.JPG
+//     (fallback only when no sidecar exists for the edited filename itself).
 func SidecarPath(mediaPath string) string {
 	dir := filepath.Dir(mediaPath)
 	base := filepath.Base(mediaPath)
@@ -82,7 +84,29 @@ func SidecarPath(mediaPath string) string {
 		return p
 	}
 
+	if stem, ok := editedOriginalStem(nameNoExt); ok {
+		origPath := filepath.Join(dir, stem+ext)
+		if origPath != mediaPath {
+			if p := SidecarPath(origPath); p != "" {
+				return p
+			}
+		}
+	}
+
 	return ""
+}
+
+// editedOriginalStem reports whether nameNoExt ends with "-edited" (case-insensitive) and returns the stem without it.
+func editedOriginalStem(nameNoExt string) (string, bool) {
+	const suf = "-edited"
+	if len(nameNoExt) <= len(suf) {
+		return "", false
+	}
+	i := len(nameNoExt) - len(suf)
+	if !strings.EqualFold(nameNoExt[i:], suf) {
+		return "", false
+	}
+	return nameNoExt[:i], true
 }
 
 // sidecarSupplementalFromDir matches truncated supplemental-metadata filenames, e.g.

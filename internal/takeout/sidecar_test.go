@@ -140,3 +140,55 @@ func TestPrefixRunes(t *testing.T) {
 		t.Fatalf("got %q want %q", got, want)
 	}
 }
+
+func TestSidecarPath_editedUsesOriginalSidecar(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	edited := filepath.Join(dir, "IMG_0378-edited.JPG")
+	if err := os.WriteFile(edited, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	origJSON := filepath.Join(dir, "IMG_0378.JPG.json")
+	if err := os.WriteFile(origJSON, []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got := SidecarPath(edited); got != origJSON {
+		t.Fatalf("got %q want %q", got, origJSON)
+	}
+}
+
+func TestSidecarPath_editedOwnSidecarTakesPrecedence(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	edited := filepath.Join(dir, "IMG_0378-edited.JPG")
+	if err := os.WriteFile(edited, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	editedJSON := filepath.Join(dir, "IMG_0378-edited.JPG.json")
+	if err := os.WriteFile(editedJSON, []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	origJSON := filepath.Join(dir, "IMG_0378.JPG.json")
+	if err := os.WriteFile(origJSON, []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got := SidecarPath(edited); got != editedJSON {
+		t.Fatalf("got %q want %q", got, editedJSON)
+	}
+}
+
+func TestSidecarPath_editedCaseInsensitiveSuffix(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	edited := filepath.Join(dir, "IMG_0378-EDITED.jpg")
+	if err := os.WriteFile(edited, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	origJSON := filepath.Join(dir, "IMG_0378.jpg.json")
+	if err := os.WriteFile(origJSON, []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got := SidecarPath(edited); got != origJSON {
+		t.Fatalf("got %q want %q", got, origJSON)
+	}
+}
