@@ -166,6 +166,13 @@ export class ScanResult {
              */
             this["withoutJson"] = 0;
         }
+        if (!("orphanJson" in $$source)) {
+            /**
+             * @member
+             * @type {number}
+             */
+            this["orphanJson"] = 0;
+        }
         if (!("files" in $$source)) {
             /**
              * @member
@@ -183,10 +190,10 @@ export class ScanResult {
      * @returns {ScanResult}
      */
     static createFrom($$source = {}) {
-        const $$createField4_0 = $$createType1;
+        const $$createField5_0 = $$createType1;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         if ("files" in $$parsedSource) {
-            $$parsedSource["files"] = $$createField4_0($$parsedSource["files"]);
+            $$parsedSource["files"] = $$createField5_0($$parsedSource["files"]);
         }
         return new ScanResult(/** @type {Partial<ScanResult>} */($$parsedSource));
     }

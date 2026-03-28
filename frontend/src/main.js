@@ -107,6 +107,7 @@ document.getElementById("btn-select").addEventListener("click", async () => {
         document.getElementById("stat-total").textContent = "...";
         document.getElementById("stat-matched").textContent = "...";
         document.getElementById("stat-unmatched").textContent = "...";
+        document.getElementById("stat-orphan-json").textContent = "...";
 
         scanData = await MetadataService.ScanFolder(path);
         renderScanResults(scanData);
@@ -156,6 +157,7 @@ function renderScanResults(data) {
     document.getElementById("stat-total").textContent = data.totalMedia;
     document.getElementById("stat-matched").textContent = data.withJson;
     document.getElementById("stat-unmatched").textContent = data.withoutJson;
+    document.getElementById("stat-orphan-json").textContent = data.orphanJson ?? 0;
 
     const tbody = document.getElementById("file-list-body");
     if (!data.files || data.files.length === 0) {
