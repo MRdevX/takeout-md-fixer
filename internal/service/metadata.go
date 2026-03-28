@@ -12,6 +12,22 @@ import (
 // MetadataService exposes folder scan and metadata fix to the Wails frontend.
 type MetadataService struct{}
 
+// ExiftoolStatus is returned by ExiftoolCheck for the UI.
+type ExiftoolStatus struct {
+	OK      bool   `json:"ok"`
+	Message string `json:"message,omitempty"`
+	Path    string `json:"path,omitempty"`
+}
+
+// ExiftoolCheck reports whether ExifTool is available on PATH (or TAKEOUT_EXIFTOOL_PATH).
+func (s *MetadataService) ExiftoolCheck() ExiftoolStatus {
+	path, err := exif.ResolveExiftoolPath()
+	if err != nil {
+		return ExiftoolStatus{OK: false, Message: err.Error()}
+	}
+	return ExiftoolStatus{OK: true, Path: path}
+}
+
 // SelectFolder opens a native directory picker.
 func (s *MetadataService) SelectFolder() (string, error) {
 	app := application.Get()

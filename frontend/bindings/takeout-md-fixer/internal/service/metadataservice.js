@@ -15,6 +15,20 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 // @ts-ignore: Unused imports
 import * as takeout$0 from "../takeout/models.js";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as $models from "./models.js";
+
+/**
+ * ExiftoolCheck reports whether ExifTool is available on PATH (or TAKEOUT_EXIFTOOL_PATH).
+ * @returns {$CancellablePromise<$models.ExiftoolStatus>}
+ */
+export function ExiftoolCheck() {
+    return $Call.ByID(2052937883).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType0($result);
+    }));
+}
+
 /**
  * FixMetadata writes EXIF from sidecar JSON and optionally removes sidecar files.
  * @param {string} folderPath
@@ -23,7 +37,7 @@ import * as takeout$0 from "../takeout/models.js";
  */
 export function FixMetadata(folderPath, deleteJsonSidecars) {
     return $Call.ByID(682951661, folderPath, deleteJsonSidecars).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType1($result);
+        return $$createType2($result);
     }));
 }
 
@@ -34,7 +48,7 @@ export function FixMetadata(folderPath, deleteJsonSidecars) {
  */
 export function ScanFolder(folderPath) {
     return $Call.ByID(952712716, folderPath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType3($result);
+        return $$createType4($result);
     }));
 }
 
@@ -47,7 +61,8 @@ export function SelectFolder() {
 }
 
 // Private type creation functions
-const $$createType0 = takeout$0.FixResult.createFrom;
-const $$createType1 = $Create.Nullable($$createType0);
-const $$createType2 = takeout$0.ScanResult.createFrom;
-const $$createType3 = $Create.Nullable($$createType2);
+const $$createType0 = $models.ExiftoolStatus.createFrom;
+const $$createType1 = takeout$0.FixResult.createFrom;
+const $$createType2 = $Create.Nullable($$createType1);
+const $$createType3 = takeout$0.ScanResult.createFrom;
+const $$createType4 = $Create.Nullable($$createType3);

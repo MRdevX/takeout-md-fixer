@@ -15,8 +15,41 @@ function showView(name) {
 
 let currentPath = "";
 let scanData = null;
+/** Whether ExifTool was found on PATH (or TAKEOUT_EXIFTOOL_PATH). */
+let exiftoolOk = true;
 
 const aboutModal = document.getElementById("about-modal");
+const exiftoolWarningEl = document.getElementById("exiftool-warning");
+
+async function refreshExiftoolStatus() {
+    try {
+        const st = await MetadataService.ExiftoolCheck();
+        exiftoolOk = st.ok;
+        if (!st.ok) {
+            exiftoolWarningEl.classList.remove("hidden");
+            const msgEl = exiftoolWarningEl.querySelector(".exiftool-banner-msg");
+            if (msgEl) {
+                msgEl.textContent = st.message || "ExifTool was not found.";
+            }
+        } else {
+            exiftoolWarningEl.classList.add("hidden");
+        }
+        if (scanData) {
+            renderScanResults(scanData);
+        }
+    } catch (e) {
+        console.error("ExiftoolCheck error:", e);
+    }
+}
+
+document.getElementById("exiftool-doc-link")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    Browser.OpenURL("https://exiftool.org/");
+});
+
+document.getElementById("btn-exiftool-recheck")?.addEventListener("click", () => {
+    refreshExiftoolStatus();
+});
 
 function openAbout() {
     aboutModal.classList.add("open");
@@ -38,7 +71,6 @@ document.addEventListener("keydown", (e) => {
         closeAbout();
     }
 });
-
 
 // WebView often blocks default link navigation; open via OS browser / mail client.
 aboutModal.addEventListener("click", (e) => {
@@ -78,7 +110,7 @@ document.getElementById("btn-back").addEventListener("click", () => {
 });
 
 document.getElementById("btn-fix").addEventListener("click", async () => {
-    if (!currentPath) return;
+    if (!currentPath || !exiftoolOk) return;
     showView("processing");
 
     document.getElementById("progress-bar").style.width = "0%";
@@ -133,7 +165,7 @@ function renderScanResults(data) {
         )
         .join("");
 
-    document.getElementById("btn-fix").disabled = data.withJson === 0;
+    document.getElementById("btn-fix").disabled = data.withJson === 0 || !exiftoolOk;
 }
 
 function renderDoneResults(result) {
@@ -163,3 +195,5 @@ function escapeHtml(str) {
     div.textContent = str;
     return div.innerHTML;
 }
+
+refreshExiftoolStatus();

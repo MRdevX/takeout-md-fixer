@@ -2,7 +2,7 @@
 
 A small desktop app that reads the JSON sidecars Google Takeout ships next to your photos and videos, then writes the real dates and GPS (and related fields) back into the files using [ExifTool](https://exiftool.org/).
 
-**You need ExifTool installed** and available on your `PATH` (the app talks to it through a Go wrapper).
+**You need [ExifTool](https://exiftool.org/) installed** on your system and available on your `PATH`. The app checks when it starts and will tell you if it cannot find it. If ExifTool is installed in a non-standard location, set `TAKEOUT_EXIFTOOL_PATH` to the full path of the `exiftool` binary (or `exiftool.exe` on Windows).
 
 ## Why I built this
 
@@ -21,7 +21,7 @@ One day I wanted to move my photos and memories out of Google Photos and used Ta
 - [Go](https://go.dev/dl/) (see `go.mod` for the version this repo targets)
 - [Node.js](https://nodejs.org/) (for the frontend toolchain)
 - [Wails v3 CLI](https://v3.wails.io/) — e.g. `go install github.com/wailsapp/wails/v3/cmd/wails3@latest`
-- [ExifTool](https://exiftool.org/) on your `PATH`
+- [ExifTool](https://exiftool.org/) on your `PATH` (or `TAKEOUT_EXIFTOOL_PATH` set to the binary)
 
 ## Run (development)
 

@@ -12,6 +12,12 @@
         <button type="button" id="btn-about" class="about-link">About</button>
     </header>
 
+    <div id="exiftool-warning" class="exiftool-banner hidden" role="alert">
+        <p class="exiftool-banner-msg"></p>
+        <p class="exiftool-banner-hint">Install ExifTool from <a href="#" id="exiftool-doc-link" class="inline-link">exiftool.org</a>, put it on your PATH, then restart this app (or click Check again after installing).</p>
+        <button type="button" id="btn-exiftool-recheck" class="btn btn-ghost btn-sm">Check again</button>
+    </div>
+
     <div id="view-welcome" class="view active">
         <div class="hero">
             <h1>Takeout Metadata Fixer</h1>
