@@ -6,3 +6,7 @@ import * as MetadataService from "./metadataservice.js";
 export {
     MetadataService
 };
+
+export {
+    ExiftoolStatus
+} from "./models.js";

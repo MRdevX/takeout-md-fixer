@@ -20,9 +20,13 @@ type Writer struct {
 
 // NewWriter starts an ExifTool session. Caller must Close when done.
 func NewWriter() (*Writer, error) {
-	et, err := exiftool.NewExiftool()
+	path, err := ResolveExiftoolPath()
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize exiftool (is it installed?): %w", err)
+		return nil, err
+	}
+	et, err := exiftool.NewExiftool(exiftool.SetExiftoolBinaryPath(path))
+	if err != nil {
+		return nil, fmt.Errorf("failed to start ExifTool at %s: %w", path, err)
 	}
 	return &Writer{et: et}, nil
 }
