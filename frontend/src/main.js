@@ -15,12 +15,36 @@ const views = {
 
 const btnBack = document.getElementById("btn-back");
 
+const processingTitle = document.getElementById("processing-title");
+const btnFixPause = document.getElementById("btn-fix-pause");
+const btnFixResume = document.getElementById("btn-fix-resume");
+const btnFixStop = document.getElementById("btn-fix-stop");
+const chkResumeFix = document.getElementById("chk-resume-fix");
+const checkpointHint = document.getElementById("checkpoint-hint");
+
 function showView(name) {
     Object.values(views).forEach((v) => v.classList.remove("active"));
     views[name].classList.add("active");
     const onScan = name === "scan";
     btnBack.hidden = !onScan;
     btnBack.setAttribute("aria-hidden", onScan ? "false" : "true");
+}
+
+function setProcessingPaused(paused) {
+    if (!processingTitle || !btnFixPause || !btnFixResume) return;
+    if (paused) {
+        processingTitle.textContent = "Paused";
+        btnFixPause.classList.add("hidden");
+        btnFixResume.classList.remove("hidden");
+    } else {
+        processingTitle.textContent = "Working…";
+        btnFixPause.classList.remove("hidden");
+        btnFixResume.classList.add("hidden");
+    }
+}
+
+function resetProcessingControls() {
+    setProcessingPaused(false);
 }
 
 let currentPath = "";
@@ -30,6 +54,34 @@ let exiftoolOk = true;
 
 const aboutModal = document.getElementById("about-modal");
 const exiftoolWarningEl = document.getElementById("exiftool-warning");
+
+async function updateCheckpointHint() {
+    if (!checkpointHint || !chkResumeFix) return;
+    if (!currentPath) {
+        checkpointHint.classList.add("hidden");
+        chkResumeFix.checked = false;
+        chkResumeFix.disabled = true;
+        return;
+    }
+    try {
+        const ok = await MetadataService.FixCheckpointAvailable(currentPath);
+        if (ok) {
+            checkpointHint.textContent =
+                "A previous run saved progress in this folder. Check “Continue where you left off” below to skip files already fixed, or delete the hidden file .takeout-md-fixer-checkpoint.json in this folder to start from scratch.";
+            checkpointHint.classList.remove("hidden");
+            chkResumeFix.disabled = false;
+        } else {
+            checkpointHint.classList.add("hidden");
+            chkResumeFix.checked = false;
+            chkResumeFix.disabled = true;
+        }
+    } catch (e) {
+        console.error("FixCheckpointAvailable error:", e);
+        checkpointHint.classList.add("hidden");
+        chkResumeFix.checked = false;
+        chkResumeFix.disabled = true;
+    }
+}
 
 async function refreshExiftoolStatus() {
     try {
@@ -47,6 +99,7 @@ async function refreshExiftoolStatus() {
         if (scanData) {
             renderScanResults(scanData);
         }
+        await updateCheckpointHint();
     } catch (e) {
         console.error("ExiftoolCheck error:", e);
     }
@@ -111,6 +164,7 @@ document.getElementById("btn-select").addEventListener("click", async () => {
 
         scanData = await MetadataService.ScanFolder(path);
         renderScanResults(scanData);
+        await updateCheckpointHint();
     } catch (err) {
         console.error("SelectFolder/Scan error:", err);
     }
@@ -120,9 +174,26 @@ btnBack.addEventListener("click", () => {
     showView("welcome");
 });
 
+btnFixPause?.addEventListener("click", () => {
+    MetadataService.FixPause()
+        .then(() => setProcessingPaused(true))
+        .catch((e) => console.error("FixPause error:", e));
+});
+
+btnFixResume?.addEventListener("click", () => {
+    MetadataService.FixResume()
+        .then(() => setProcessingPaused(false))
+        .catch((e) => console.error("FixResume error:", e));
+});
+
+btnFixStop?.addEventListener("click", () => {
+    MetadataService.FixAbort().catch((e) => console.error("FixAbort error:", e));
+});
+
 document.getElementById("btn-fix").addEventListener("click", async () => {
     if (!currentPath || !exiftoolOk) return;
     showView("processing");
+    resetProcessingControls();
 
     document.getElementById("progress-bar").style.width = "0%";
     document.getElementById("progress-text").textContent = "0 / 0";
@@ -130,23 +201,34 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
 
     try {
         const deleteJson = document.getElementById("chk-delete-json").checked;
-        const result = await MetadataService.FixMetadata(currentPath, deleteJson);
+        const resume = chkResumeFix?.checked === true;
+        const result = await MetadataService.FixMetadata(currentPath, deleteJson, resume);
         renderDoneResults(result);
         showView("done");
     } catch (err) {
         console.error("FixMetadata error:", err);
+        resetProcessingControls();
         showView("scan");
+        await updateCheckpointHint();
     }
 });
 
 document.getElementById("btn-restart").addEventListener("click", () => {
     currentPath = "";
     scanData = null;
+    const note = document.getElementById("done-resume-note");
+    if (note) {
+        note.textContent = "";
+        note.classList.add("hidden");
+    }
     showView("welcome");
 });
 
 Events.On("fix-progress", (event) => {
     const p = event.data;
+    if (p.paused) {
+        setProcessingPaused(true);
+    }
     const pct = Math.round((p.current / p.total) * 100);
     document.getElementById("progress-bar").style.width = pct + "%";
     document.getElementById("progress-text").textContent = `${p.current} / ${p.total}`;
@@ -181,6 +263,22 @@ function renderScanResults(data) {
 }
 
 function renderDoneResults(result) {
+    const doneTitle = document.getElementById("done-title");
+    if (doneTitle) {
+        doneTitle.textContent = result.aborted ? "Stopped early" : "Done";
+    }
+
+    const resumeNote = document.getElementById("done-resume-note");
+    if (resumeNote) {
+        if (result.resumed) {
+            resumeNote.textContent = "Continued from a previous interrupted run.";
+            resumeNote.classList.remove("hidden");
+        } else {
+            resumeNote.textContent = "";
+            resumeNote.classList.add("hidden");
+        }
+    }
+
     document.getElementById("result-success").textContent = result.success;
     document.getElementById("result-skipped").textContent = result.skipped;
     document.getElementById("result-failed").textContent = result.failed;

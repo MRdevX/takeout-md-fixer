@@ -12,6 +12,10 @@ Leaving Google Photos, Takeout files didn’t match what I’d seen in the app. 
 
 Stack: Go, [Wails v3](https://v3.wails.io/), [Vite](https://vitejs.dev/) + vanilla JS, [go-exiftool](https://github.com/barasher/go-exiftool). ExifTool is installed by you.
 
+## Resume and checkpoints
+
+If you stop a fix early or quit the app, progress is stored in a hidden file named `.takeout-md-fixer-checkpoint.json` inside the folder you selected. On the next run, enable **Continue where you left off** to skip files already processed. Delete that file if you want a full fix from scratch with the same folder.
+
 ## Before you start
 
 - [Go](https://go.dev/dl/) ([`go.mod`](go.mod))
