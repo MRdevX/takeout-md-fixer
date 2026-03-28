@@ -1,157 +1,311 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 :root {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-    font-size: 16px;
-    line-height: 24px;
-    font-weight: 400;
-    color-scheme: light dark;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: rgba(27, 38, 54, 1);
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
+    --bg: #1b2636;
+    --bg-card: #243044;
+    --bg-hover: #2d3d55;
+    --text: rgba(255, 255, 255, 0.87);
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --accent: #4f8fff;
+    --accent-hover: #3d7ae8;
+    --green: #3ddc84;
+    --yellow: #ffca28;
+    --red: #ff5252;
+    --radius: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+html, body {
+    height: 100%;
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
     user-select: none;
     -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
 }
 
-@font-face {
-    font-family: "Inter";
-    font-style: normal;
-    font-weight: 400;
-    src: local(""),
-    url("./Inter-Medium.ttf") format("truetype");
-}
-
-h3 {
-    font-size: 3em;
-    line-height: 1.1;
-}
-
-a {
-    font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
-}
-
-a:hover {
-    color: #535bf2;
-}
-
-button {
-    width: 60px;
-    height: 30px;
-    line-height: 30px;
-    border-radius: 3px;
-    border: none;
-    margin: 0 0 0 20px;
-    padding: 0 8px;
-    cursor: pointer;
-}
-
-.result {
-    height: 20px;
-    line-height: 20px;
-}
-
-body {
-    margin: 0;
+#app {
+    height: 100%;
     display: flex;
-    place-items: center;
-    place-content: center;
-    min-width: 320px;
-    min-height: 100vh;
+    flex-direction: column;
 }
 
-.container {
+.view {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    padding: 24px;
+}
+
+.view.active {
+    display: flex;
+}
+
+/* Hero / Welcome */
+
+.hero {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
+    gap: 16px;
 }
 
 h1 {
-    font-size: 3.2em;
-    line-height: 1.1;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
 }
 
-#app {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
+h2 {
+    font-size: 20px;
+    font-weight: 600;
 }
 
-.logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
+.subtitle {
+    color: var(--text-muted);
+    max-width: 400px;
+    line-height: 1.5;
 }
 
-.logo:hover {
-    filter: drop-shadow(0 0 2em #e80000aa);
-}
+/* Buttons */
 
-.logo.vanilla:hover {
-    filter: drop-shadow(0 0 2em #f7df1eaa);
-}
-
-.result {
-    height: 20px;
-    line-height: 20px;
-    margin: 1.5rem auto;
-    text-align: center;
-}
-
-.footer {
-    margin-top: 1rem;
-    align-content: center;
-    text-align: center;
-}
-
-@media (prefers-color-scheme: light) {
-    :root {
-        color: #213547;
-        background-color: #ffffff;
-    }
-
-    a:hover {
-        color: #747bff;
-    }
-
-    button {
-        background-color: #f9f9f9;
-    }
-}
-
-
-.input-box .btn:hover {
-    background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
-    color: #333333;
-}
-
-.input-box .input {
+.btn {
     border: none;
-    border-radius: 3px;
-    outline: none;
-    height: 30px;
-    line-height: 30px;
-    padding: 0 10px;
-    color: black;
-    background-color: rgba(240, 240, 240, 1);
-    -webkit-font-smoothing: antialiased;
+    border-radius: var(--radius);
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: var(--font);
 }
 
-.input-box .input:hover {
-    border: none;
-    background-color: rgba(255, 255, 255, 1);
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
 }
 
-.input-box .input:focus {
-    border: none;
-    background-color: rgba(255, 255, 255, 1);
+.btn-primary:hover {
+    background: var(--accent-hover);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.btn-ghost:hover {
+    color: var(--text);
+}
+
+/* Header Bar */
+
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-top: 20px;
+}
+
+.folder-path {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 16px;
+    word-break: break-all;
+}
+
+/* Stats */
+
+.stats-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.stat-card {
+    flex: 1;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-ok .stat-value { color: var(--green); }
+.stat-warn .stat-value { color: var(--yellow); }
+.stat-err .stat-value { color: var(--red); }
+
+/* Actions */
+
+.actions {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 520px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-row input {
+    margin-top: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.done-extra {
+    margin-top: 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 420px;
+}
+
+.done-extra.hidden {
+    display: none;
+}
+
+/* File List */
+
+.file-list-container {
+    flex: 1;
+    overflow-y: auto;
+    border-radius: var(--radius);
+    background: var(--bg-card);
+}
+
+.file-list {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.file-list thead {
+    position: sticky;
+    top: 0;
+    background: var(--bg-card);
+}
+
+.file-list th {
+    text-align: left;
+    padding: 10px 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.file-list td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.file-list tr:hover {
+    background: var(--bg-hover);
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.badge-yes { background: rgba(61, 220, 132, 0.15); color: var(--green); }
+.badge-no { background: rgba(255, 202, 40, 0.15); color: var(--yellow); }
+.badge-success { background: rgba(61, 220, 132, 0.15); color: var(--green); }
+.badge-error { background: rgba(255, 82, 82, 0.15); color: var(--red); }
+.badge-skipped { background: rgba(255, 202, 40, 0.15); color: var(--yellow); }
+.badge-pending { background: rgba(255, 255, 255, 0.06); color: var(--text-muted); }
+
+/* Progress */
+
+.processing-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    max-width: 400px;
+    height: 8px;
+    background: var(--bg-card);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.2s ease;
+}
+
+.progress-info {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.progress-file {
+    color: var(--text-muted);
+    font-size: 12px;
+    max-width: 400px;
+    text-align: center;
+    word-break: break-all;
+}
+
+/* macOS window drag region */
+.header-bar,
+.hero h1 {
+    --wails-draggable: drag;
 }
