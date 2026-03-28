@@ -111,7 +111,7 @@ html, body {
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 400px;
+    max-width: 480px;
     max-height: min(90vh, 620px);
     overflow-y: auto;
     background: var(--bg-elevated);
@@ -137,11 +137,19 @@ html, body {
     margin-bottom: 14px;
 }
 
+.modal-lead code {
+    font-size: 0.88em;
+    background: var(--bg-subtle);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 .modal-story {
-    font-size: 0.875rem;
-    line-height: 1.55;
-    color: var(--text);
-    margin-bottom: 20px;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin-bottom: 16px;
 }
 
 .about-dev {
@@ -528,7 +536,7 @@ h2 {
 
 .progress-bar-container {
     width: 100%;
-    max-width: 400px;
+    max-width: 480px;
     height: 6px;
     background: var(--bg-subtle);
     border-radius: 999px;
@@ -552,7 +560,7 @@ h2 {
 .progress-file {
     color: var(--text-muted);
     font-size: 0.75rem;
-    max-width: 400px;
+    max-width: 480px;
     text-align: center;
     word-break: break-all;
 }

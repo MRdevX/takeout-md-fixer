@@ -15,14 +15,14 @@
     <div id="view-welcome" class="view active">
         <div class="hero">
             <h1>Takeout Metadata Fixer</h1>
-            <p class="subtitle">Restore timestamps and GPS from Google Takeout JSON into your photos and videos—before you import them anywhere else.</p>
-            <button id="btn-select" class="btn btn-primary">Select Folder</button>
+            <p class="subtitle">Copies date and location from Takeout JSON sidecars into your photos and videos. Requires ExifTool.</p>
+            <button id="btn-select" class="btn btn-primary">Select folder</button>
         </div>
     </div>
 
     <div id="view-scan" class="view">
         <div class="header-bar">
-            <h2>Scan Results</h2>
+            <h2>Scan results</h2>
             <button id="btn-back" class="btn btn-ghost">← Back</button>
         </div>
         <div id="scan-path" class="folder-path"></div>
@@ -43,9 +43,9 @@
         <div class="actions">
             <label class="checkbox-row">
                 <input type="checkbox" id="chk-delete-json"/>
-                <span>Delete JSON sidecar files after a successful fix (only for files that were updated)</span>
+                <span>Delete sidecar JSON after a successful fix</span>
             </label>
-            <button id="btn-fix" class="btn btn-primary">Fix Metadata</button>
+            <button id="btn-fix" class="btn btn-primary">Fix metadata</button>
         </div>
         <div class="file-list-container">
             <table class="file-list">
@@ -63,7 +63,7 @@
 
     <div id="view-processing" class="view">
         <div class="processing-content">
-            <h2>Fixing metadata…</h2>
+            <h2>Working…</h2>
             <div class="progress-bar-container">
                 <div class="progress-bar" id="progress-bar"></div>
             </div>
@@ -92,7 +92,7 @@
                 </div>
             </div>
             <p id="result-json-delete" class="done-extra hidden"></p>
-            <button id="btn-restart" class="btn btn-primary">Start Over</button>
+            <button id="btn-restart" class="btn btn-primary">Start over</button>
         </div>
     </div>
 
@@ -100,11 +100,9 @@
         <div class="modal-backdrop" data-close-modal tabindex="-1"></div>
         <div class="modal-card" role="dialog" aria-labelledby="about-title" aria-modal="true">
             <button type="button" class="modal-close" id="about-modal-close" aria-label="Close">×</button>
-            <h2 id="about-title">About</h2>
-            <p class="modal-lead">Takeout Metadata Fixer — restore dates and GPS from sidecar JSON into your media.</p>
-            <p class="modal-story">
-                I built this after exporting from Google Photos: Takeout left metadata in a rough shape, and I didn’t want that following me into iCloud or other libraries. Hope it helps you too.
-            </p>
+            <h2 id="about-title">About Takeout Metadata Fixer</h2>
+            <p class="modal-lead">When you get your photos from Google Takeout, there’s a small <code>.json</code> file next to each picture or video. It holds the date, time, and location. This app copies that info into the files themselves (using a helper called ExifTool) so when you import them somewhere else, everything shows up the way you’d expect.</p>
+            <p class="modal-story">I made this after my own messy Takeout import. Hope it helps you too.</p>
             <div class="about-dev">
                 <h3 class="about-dev-title">Developer</h3>
                 <p class="about-name">Mahdi Rashidi</p>
@@ -133,29 +131,29 @@
                         </span>
                         <span class="about-row-text">
                             GitHub
-                            <span class="about-row-sub">@MRdevX</span>
+                            <span class="about-row-sub">github.com/MRdevX</span>
                         </span>
                     </a>
                 </div>
             </div>
-            <p class="modal-oss">Free and open source. If you’d like to say thanks:</p>
+            <p class="modal-oss">Free for personal use and open source. Thanks for any support:</p>
             <div class="bmc-slot">
                 <script
                     type="text/javascript"
                     src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
                     data-name="bmc-button"
                     data-slug="mrdevx"
-                    data-color="#ea580c"
+                    data-color="#FFDD00"
                     data-emoji=""
-                    data-font="Inter"
+                    data-font="Cookie"
                     data-text="Buy me a coffee"
-                    data-outline-color="#ffffff"
-                    data-font-color="#ffffff"
-                    data-coffee-color="#ffedd5"
+                    data-outline-color="#000000"
+                    data-font-color="#000000"
+                    data-coffee-color="#ffffff"
                 ></script>
             </div>
             <p class="bmc-fallback">
-                Or open in browser: <a href="https://www.buymeacoffee.com/mrdevx" target="_blank" rel="noopener noreferrer">buymeacoffee.com/mrdevx</a>
+                If the button doesn’t show: <a href="https://www.buymeacoffee.com/mrdevx" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
             </p>
         </div>
     </div>
