@@ -452,12 +452,14 @@ h2 {
 
 .stats-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 16px;
 }
 
 .stat-card {
     flex: 1;
+    min-width: 7rem;
     background: var(--bg-elevated);
     border-radius: var(--radius);
     padding: 14px 12px;
@@ -486,6 +488,7 @@ h2 {
 .stat-ok .stat-value { color: var(--green); }
 .stat-warn .stat-value { color: var(--yellow); }
 .stat-err .stat-value { color: var(--red); }
+.stat-orphan .stat-value { color: var(--text-muted); }
 
 .actions {
     margin-bottom: 16px;

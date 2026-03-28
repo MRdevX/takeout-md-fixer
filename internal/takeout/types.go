@@ -34,6 +34,7 @@ type ScanResult struct {
 	TotalMedia  int         `json:"totalMedia"`
 	WithJson    int         `json:"withJson"`
 	WithoutJson int         `json:"withoutJson"`
+	OrphanJson  int         `json:"orphanJson"`
 	Files       []MediaFile `json:"files"`
 }
 
