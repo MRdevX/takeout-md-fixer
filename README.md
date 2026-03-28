@@ -1,80 +1,59 @@
 # Takeout Metadata Fixer
 
-A small desktop app that reads the JSON sidecars Google Takeout ships next to your photos and videos, then writes the real dates and GPS (and related fields) back into the files using [ExifTool](https://exiftool.org/).
+**Google Takeout is great. The metadata on your files afterward? Not always.** This app reads the JSON sidecars next to your photos and videos, then writes dates, GPS, and related fields back into the files with [ExifTool](https://exiftool.org/), so imports to iCloud, a NAS, or elsewhere look right.
 
-**You need [ExifTool](https://exiftool.org/) installed** on your system and available on your `PATH`. The app checks when it starts and will tell you if it cannot find it. If ExifTool is installed in a non-standard location, set `TAKEOUT_EXIFTOOL_PATH` to the full path of the `exiftool` binary (or `exiftool.exe` on Windows).
+[![Go](https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev/) [![Wails](https://img.shields.io/badge/Wails_v3-27272a?style=flat-square&logo=wails&logoColor=white)](https://v3.wails.io/) [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/) [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](https://developer.mozilla.org/docs/Web/JavaScript) [![ExifTool](https://img.shields.io/badge/ExifTool-system-8B4513?style=flat-square)](https://exiftool.org/)
+
+**You need [ExifTool](https://exiftool.org/) on your `PATH`.** The app checks on startup. Non-standard install? Set `TAKEOUT_EXIFTOOL_PATH` to `exiftool` or `exiftool.exe` (Windows).
 
 ## Why I built this
 
-One day I wanted to move my photos and memories out of Google Photos and used Takeout. The files came out with metadata that didn’t match what I expected—so bringing them into iCloud or anywhere else felt wrong. I wrote this tool to put that metadata back where it belongs before importing.
+Leaving Google Photos, Takeout files didn’t match what I’d seen in the app. I wrote this to fix metadata before moving the rest of my library.
 
-## Tech stack
+Stack: Go, [Wails v3](https://v3.wails.io/), [Vite](https://vitejs.dev/) + vanilla JS, [go-exiftool](https://github.com/barasher/go-exiftool). ExifTool is installed by you.
 
-- **Go** — backend and Wails service
-- **[Wails v3](https://v3.wails.io/)** — desktop shell, bindings to the UI
-- **Vite** + **vanilla JS** — frontend
-- **[go-exiftool](https://github.com/barasher/go-exiftool)** — talks to ExifTool
-- **[ExifTool](https://exiftool.org/)** — must be installed separately on your machine
+## Before you start
 
-## Prerequisites
+- [Go](https://go.dev/dl/) ([`go.mod`](go.mod))
+- [Node.js](https://nodejs.org/)
+- [Wails v3 CLI](https://v3.wails.io/) (`go install github.com/wailsapp/wails/v3/cmd/wails3@latest`)
+- [ExifTool](https://exiftool.org/) on `PATH` or `TAKEOUT_EXIFTOOL_PATH`
 
-- [Go](https://go.dev/dl/) (see `go.mod` for the version this repo targets)
-- [Node.js](https://nodejs.org/) (for the frontend toolchain)
-- [Wails v3 CLI](https://v3.wails.io/) — e.g. `go install github.com/wailsapp/wails/v3/cmd/wails3@latest`
-- [ExifTool](https://exiftool.org/) on your `PATH` (or `TAKEOUT_EXIFTOOL_PATH` set to the binary)
-
-## Run (development)
-
-From the project root:
+## Develop
 
 ```bash
 wails3 dev
 ```
 
-That builds the frontend, generates bindings, and runs the app with hot reload. First run may install npm dependencies under `frontend/`.
-
-## Build (production binary)
-
-From the project root:
+## Build
 
 ```bash
 wails3 build
 ```
 
-The output binary ends up under `bin/` (exact layout depends on your OS; the Taskfile uses `takeout-md-fixer` as the app name).
+Binary under `bin/`.
 
-
-
-## Release builds (local)
-
-From the repo root (macOS recommended for the DMG):
+## Local release (macOS DMG + Windows exe)
 
 ```bash
 chmod +x scripts/build-release.sh
 ./scripts/build-release.sh
 ```
 
-This updates `build/config.yml` to the chosen version (set `VERSION=x.y.z` to override), runs `wails3 package`, builds a **DMG** on macOS, and cross-compiles **Windows amd64** `takeout-md-fixer.exe` into `bin/`.
+Optional: `VERSION=x.y.z`. See `build/config.yml` and `bin/` for outputs.
 
-## Automated releases (GitHub Actions)
+## Releases
 
-On every push to `main` (for example after merging a PR), [`.github/workflows/release.yml`](.github/workflows/release.yml) runs using official GitHub Actions (`actions/checkout`, `actions/setup-go`, `actions/setup-node`, `actions/upload-artifact`, `actions/download-artifact`) and the GitHub CLI (`gh release create`) to:
+Pushes to `main` run [`.github/workflows/release.yml`](.github/workflows/release.yml): version bump from git tags, changelog, DMG + `takeout-md-fixer.exe`, GitHub Release.
 
-1. **Version**: next **patch** from the latest `v*.*.*` git tag (starts at `0.0.1` if no tags exist).
-2. **Changelog**: commit subjects since that tag, plus a link to the build commit.
-3. **Artifacts**: `takeout-md-fixer.dmg` (macOS) and `takeout-md-fixer.exe` (Windows amd64).
-4. **Publish**: a **GitHub Release** with those files attached.
+If this helped, fuel is welcome.
 
-Workflows need **write** permission on **Actions** / **contents** (default `GITHUB_TOKEN` is enough for releases in the same repo).
-
-## Open source
-
-This project is open source and free to use. If you want to say thanks, you can [buy me a coffee](https://www.buymeacoffee.com/mrdevx).
+<a href="https://www.buymeacoffee.com/mrdevx" title="Buy Me A Coffee"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee on buymeacoffee.com" width="217" height="60" /></a>
 
 ## Author
 
 **Mahdi Rashidi**
 
-- Email: [contact@mrashidi.me](mailto:contact@mrashidi.me)
-- Site: [mrashidi.me](https://mrashidi.me)
-- GitHub: [@MRdevX](https://github.com/MRdevX)
+- [contact@mrashidi.me](mailto:contact@mrashidi.me)
+- [mrashidi.me](https://mrashidi.me)
+- [@MRdevX](https://github.com/MRdevX)
