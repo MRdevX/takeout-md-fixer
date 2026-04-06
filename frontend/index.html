@@ -9,9 +9,8 @@
 <body>
 <div id="app">
     <header class="app-topbar">
-        <button type="button" id="btn-back" class="about-link" hidden aria-hidden="true">← Back</button>
+        <button type="button" id="btn-back" class="about-link toolbar-btn" hidden aria-hidden="true">← Back</button>
         <span class="app-topbar-fill" aria-hidden="true"></span>
-        <button type="button" id="btn-about" class="about-link">About</button>
     </header>
 
     <div id="exiftool-warning" class="exiftool-banner hidden" role="alert">
@@ -25,47 +24,53 @@
     </div>
 
     <div id="view-welcome" class="view active">
-        <div class="hero">
+        <div class="hero content-column">
             <h1>Takeout Metadata Fixer</h1>
             <p class="subtitle">Copies date and location from Takeout JSON sidecars into your photos and videos. Requires ExifTool.</p>
             <button id="btn-select" class="btn btn-primary">Select folder</button>
+            <button type="button" id="btn-about" class="about-link toolbar-btn hero-about">About</button>
         </div>
     </div>
 
-    <div id="view-scan" class="view">
-        <div class="header-bar">
-            <h2>Scan results</h2>
-        </div>
-        <div id="scan-path" class="folder-path"></div>
-        <div class="stats-row">
-            <div class="stat-card">
-                <span class="stat-value" id="stat-total">0</span>
-                <span class="stat-label">Total Files</span>
+    <div id="view-scan" class="view" aria-busy="false">
+        <div class="scan-layout content-column">
+            <div class="scan-header">
+                <div class="scan-header-copy">
+                    <h2>Scan results</h2>
+                    <p class="scan-subtitle">Review files, then run the fix.</p>
+                </div>
+                <button id="btn-fix" class="btn btn-primary">Fix metadata</button>
             </div>
-            <div class="stat-card stat-ok">
-                <span class="stat-value" id="stat-matched">0</span>
-                <span class="stat-label">With JSON</span>
+            <div id="scan-path" class="folder-path"></div>
+            <div class="stats-row">
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total">0</span>
+                    <span class="stat-label">Total Files</span>
+                </div>
+                <div class="stat-card stat-ok">
+                    <span class="stat-value" id="stat-matched">0</span>
+                    <span class="stat-label">With JSON</span>
+                </div>
+                <div class="stat-card stat-warn">
+                    <span class="stat-value" id="stat-unmatched">0</span>
+                    <span class="stat-label">No JSON</span>
+                </div>
+                <div class="stat-card stat-orphan">
+                    <span class="stat-value" id="stat-orphan-json">0</span>
+                    <span class="stat-label">JSON not linked</span>
+                </div>
             </div>
-            <div class="stat-card stat-warn">
-                <span class="stat-value" id="stat-unmatched">0</span>
-                <span class="stat-label">No JSON</span>
+            <p id="checkpoint-hint" class="checkpoint-hint hidden" role="status"></p>
+            <div class="scan-options">
+                <label class="checkbox-row">
+                    <input type="checkbox" id="chk-delete-json"/>
+                    <span>Delete sidecar JSON after a successful fix</span>
+                </label>
+                <label class="checkbox-row">
+                    <input type="checkbox" id="chk-resume-fix" disabled/>
+                    <span>Continue where you left off (uses saved progress in this folder)</span>
+                </label>
             </div>
-            <div class="stat-card stat-orphan">
-                <span class="stat-value" id="stat-orphan-json">0</span>
-                <span class="stat-label">JSON not linked</span>
-            </div>
-        </div>
-        <p id="checkpoint-hint" class="checkpoint-hint hidden" role="status"></p>
-        <div class="actions">
-            <label class="checkbox-row">
-                <input type="checkbox" id="chk-delete-json"/>
-                <span>Delete sidecar JSON after a successful fix</span>
-            </label>
-            <label class="checkbox-row">
-                <input type="checkbox" id="chk-resume-fix" disabled/>
-                <span>Continue where you left off (uses saved progress in this folder)</span>
-            </label>
-            <button id="btn-fix" class="btn btn-primary">Fix metadata</button>
         </div>
         <div class="file-list-container">
             <table class="file-list">
@@ -86,23 +91,25 @@
             <div class="processing-header">
                 <h2 id="processing-title">Working…</h2>
                 <div class="processing-controls" role="toolbar" aria-label="Fix progress controls">
-                    <button type="button" id="btn-fix-pause" class="btn btn-ghost btn-sm">Pause</button>
-                    <button type="button" id="btn-fix-resume" class="btn btn-ghost btn-sm hidden">Resume</button>
-                    <button type="button" id="btn-fix-stop" class="btn btn-ghost btn-sm">Stop</button>
+                    <div class="processing-controls-group">
+                        <button type="button" id="btn-fix-pause" class="btn btn-ghost btn-sm">Pause</button>
+                        <button type="button" id="btn-fix-resume" class="btn btn-ghost btn-sm hidden">Resume</button>
+                    </div>
+                    <button type="button" id="btn-fix-stop" class="btn btn-ghost btn-sm processing-stop">Stop</button>
                 </div>
             </div>
             <div class="progress-bar-container">
-                <div class="progress-bar" id="progress-bar"></div>
+                <div class="progress-bar" id="progress-bar" role="progressbar" aria-label="Metadata fix progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
             </div>
             <div class="progress-info">
-                <span id="progress-text">0 / 0</span>
+                <span id="progress-text" aria-live="polite">0 / 0 (0%)</span>
             </div>
             <div id="progress-file" class="progress-file"></div>
         </div>
     </div>
 
     <div id="view-done" class="view">
-        <div class="hero">
+        <div class="hero content-column">
             <h2 id="done-title">Done</h2>
             <p id="done-resume-note" class="done-resume-note hidden"></p>
             <div class="stats-row">
