@@ -400,6 +400,10 @@ html.platform-macos .app-topbar {
     gap: 20px;
 }
 
+.hero-about {
+    margin-top: 4px;
+}
+
 h1 {
     font-size: 1.75rem;
     font-weight: 700;
