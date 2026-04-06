@@ -26,10 +26,15 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Build frontend (for go:embed)
+        working-directory: frontend
         run: |
           set -euo pipefail
-          cd frontend
-          npm ci
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            echo "::warning::frontend/package-lock.json missing from checkout — run 'cd frontend && npm install' and commit package-lock.json. Using npm install for this run."
+            npm install --no-audit --no-fund
+          fi
           npm run build
 
       - name: Verify formatting

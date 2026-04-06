@@ -22,6 +22,7 @@ If you stop a fix early or quit the app, progress is stored in a hidden file nam
 
 - [Go](https://go.dev/dl/) ([`go.mod`](go.mod))
 - [Node.js](https://nodejs.org/)
+- [`frontend/package-lock.json`](frontend/package-lock.json) should stay **committed** so CI can run `npm ci`. If it is missing on a branch, workflows fall back to `npm install` and emit a warning (less reproducible).
 - [Wails v3 CLI](https://v3.wails.io/) (`go install github.com/wailsapp/wails/v3/cmd/wails3@latest`)
 - [ExifTool](https://exiftool.org/) (see above)
 
