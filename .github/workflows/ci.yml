@@ -59,8 +59,11 @@ jobs:
       - name: Go test
         run: go test ./...
 
+      # Binary releases can lag the Go version in go.mod; goinstall builds with setup-go's toolchain.
+      # https://github.com/golangci/golangci-lint-action#install-mode
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.8.0
+          install-mode: goinstall
           args: ./internal/... .
