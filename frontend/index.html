@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <div id="view-scan" class="view">
+    <div id="view-scan" class="view" aria-busy="false">
         <div class="header-bar">
             <h2>Scan results</h2>
         </div>
@@ -92,10 +92,10 @@
                 </div>
             </div>
             <div class="progress-bar-container">
-                <div class="progress-bar" id="progress-bar"></div>
+                <div class="progress-bar" id="progress-bar" role="progressbar" aria-label="Metadata fix progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
             </div>
             <div class="progress-info">
-                <span id="progress-text">0 / 0</span>
+                <span id="progress-text" aria-live="polite">0 / 0 (0%)</span>
             </div>
             <div id="progress-file" class="progress-file"></div>
         </div>

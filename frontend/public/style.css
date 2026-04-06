@@ -41,8 +41,6 @@ html, body {
     color: var(--text);
     background: var(--bg);
     -webkit-font-smoothing: antialiased;
-    user-select: none;
-    -webkit-user-select: none;
 }
 
 #app {
@@ -85,6 +83,13 @@ html.platform-macos .app-topbar {
 
 .app-topbar .about-link {
     pointer-events: auto;
+}
+
+.app-topbar,
+.header-bar,
+.hero h1 {
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .about-link {
@@ -438,9 +443,26 @@ h2 {
     color: var(--accent);
 }
 
+#btn-fix-stop {
+    color: var(--red);
+}
+
+#btn-fix-stop:hover {
+    color: #b91c1c;
+    background: var(--red-soft);
+}
+
 .btn-sm {
     font-size: 0.8125rem;
     padding: 8px 16px;
+}
+
+.btn:focus-visible,
+.about-link:focus-visible,
+.modal-close:focus-visible,
+.checkbox-row input:focus-visible {
+    outline: 2px solid var(--accent-ring);
+    outline-offset: 2px;
 }
 
 .header-bar {
@@ -599,6 +621,33 @@ h2 {
 .file-list td {
     padding: 8px 12px;
     border-bottom: 1px solid var(--border);
+}
+
+.file-list-message {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+}
+
+.file-list-message-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inline-spinner {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 2px solid var(--accent-ring);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .file-list tbody tr:last-child td {

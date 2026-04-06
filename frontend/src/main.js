@@ -16,6 +16,9 @@ const views = {
 const btnBack = document.getElementById("btn-back");
 
 const processingTitle = document.getElementById("processing-title");
+const progressBarEl = document.getElementById("progress-bar");
+const progressTextEl = document.getElementById("progress-text");
+const progressFileEl = document.getElementById("progress-file");
 const btnFixPause = document.getElementById("btn-fix-pause");
 const btnFixResume = document.getElementById("btn-fix-resume");
 const btnFixStop = document.getElementById("btn-fix-stop");
@@ -47,15 +50,45 @@ function resetProcessingControls() {
     setProcessingPaused(false);
 }
 
+function setProgressUi(current, total, file = "") {
+    const safeTotal = Number(total) > 0 ? Number(total) : 0;
+    const safeCurrent = Math.max(0, Number(current) || 0);
+    const boundedCurrent = safeTotal > 0 ? Math.min(safeCurrent, safeTotal) : safeCurrent;
+    const pct = safeTotal > 0 ? Math.round((boundedCurrent / safeTotal) * 100) : 0;
+
+    if (progressBarEl) {
+        progressBarEl.style.width = `${pct}%`;
+        progressBarEl.setAttribute("aria-valuenow", String(pct));
+    }
+    if (progressTextEl) {
+        progressTextEl.textContent = `${boundedCurrent} / ${safeTotal} (${pct}%)`;
+    }
+    if (progressFileEl) {
+        progressFileEl.textContent = file;
+    }
+}
+
+function renderFileListMessage(message, loading = false) {
+    const tbody = document.getElementById("file-list-body");
+    if (!tbody) return;
+    const rowClass = loading ? "file-list-message file-list-message--loading" : "file-list-message";
+    const messageClass = loading ? "file-list-message-text file-list-message-text--loading" : "file-list-message-text";
+    const spinner = loading ? '<span class="inline-spinner" aria-hidden="true"></span>' : "";
+    tbody.innerHTML = `<tr><td colspan="3" class="${rowClass}"><span class="${messageClass}">${spinner}${message}</span></td></tr>`;
+}
+
 let currentPath = "";
 let scanData = null;
 /** Whether ExifTool was found (PATH plus common install locations). */
 let exiftoolOk = true;
 
 const aboutModal = document.getElementById("about-modal");
+const aboutModalCloseBtn = document.getElementById("about-modal-close");
+const aboutBtn = document.getElementById("btn-about");
 const exiftoolWarningEl = document.getElementById("exiftool-warning");
 const scanErrorBanner = document.getElementById("scan-error-banner");
 const scanErrorMsg = document.getElementById("scan-error-msg");
+let aboutLastFocused = null;
 
 function hideScanErrorBanner() {
     scanErrorBanner?.classList.add("hidden");
@@ -143,15 +176,51 @@ document.getElementById("btn-exiftool-recheck")?.addEventListener("click", () =>
 function openAbout() {
     aboutModal.classList.add("open");
     aboutModal.setAttribute("aria-hidden", "false");
+    aboutLastFocused = document.activeElement;
+    if (aboutModalCloseBtn) {
+        aboutModalCloseBtn.focus();
+    }
 }
 
 function closeAbout() {
     aboutModal.classList.remove("open");
     aboutModal.setAttribute("aria-hidden", "true");
+    if (aboutLastFocused instanceof HTMLElement) {
+        aboutLastFocused.focus();
+    } else {
+        aboutBtn?.focus();
+    }
+    aboutLastFocused = null;
 }
 
-document.getElementById("btn-about").addEventListener("click", openAbout);
-document.getElementById("about-modal-close").addEventListener("click", closeAbout);
+function getAboutFocusableElements() {
+    if (!aboutModal) return [];
+    return Array.from(
+        aboutModal.querySelectorAll(
+            'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+    ).filter((el) => el instanceof HTMLElement && el.offsetParent !== null);
+}
+
+function trapAboutFocus(event) {
+    if (event.key !== "Tab" || !aboutModal.classList.contains("open")) return;
+    const focusable = getAboutFocusableElements();
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+
+    if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+    }
+}
+
+aboutBtn.addEventListener("click", openAbout);
+aboutModalCloseBtn.addEventListener("click", closeAbout);
 aboutModal.querySelectorAll("[data-close-modal]").forEach((el) => {
     el.addEventListener("click", closeAbout);
 });
@@ -159,6 +228,7 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && aboutModal.classList.contains("open")) {
         closeAbout();
     }
+    trapAboutFocus(e);
 });
 
 // WebView often blocks default link navigation; open via OS browser / mail client.
@@ -180,9 +250,9 @@ document.getElementById("btn-select").addEventListener("click", async () => {
         currentPath = path;
 
         showView("scan");
+        views.scan?.setAttribute("aria-busy", "true");
         document.getElementById("btn-fix").disabled = true;
-        document.getElementById("file-list-body").innerHTML =
-            '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text-muted)">Scanning...</td></tr>';
+        renderFileListMessage("Scanning...", true);
         document.getElementById("scan-path").textContent = path;
         document.getElementById("stat-total").textContent = "...";
         document.getElementById("stat-matched").textContent = "...";
@@ -200,6 +270,8 @@ document.getElementById("btn-select").addEventListener("click", async () => {
             "Could not open or scan that folder. " + formatErrorMessage(err)
         );
         showView("welcome");
+    } finally {
+        views.scan?.setAttribute("aria-busy", "false");
     }
 });
 
@@ -229,9 +301,7 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
     showView("processing");
     resetProcessingControls();
 
-    document.getElementById("progress-bar").style.width = "0%";
-    document.getElementById("progress-text").textContent = "0 / 0";
-    document.getElementById("progress-file").textContent = "";
+    setProgressUi(0, 0);
 
     const offComplete = Events.Once("fix-complete", (event) => {
         const payload = event.data;
@@ -292,10 +362,7 @@ document.getElementById("btn-restart").addEventListener("click", () => {
 
 Events.On("fix-progress", (event) => {
     const p = event.data;
-    const pct = Math.round((p.current / p.total) * 100);
-    document.getElementById("progress-bar").style.width = pct + "%";
-    document.getElementById("progress-text").textContent = `${p.current} / ${p.total}`;
-    document.getElementById("progress-file").textContent = p.file;
+    setProgressUi(p.current, p.total, p.file);
 });
 
 function renderScanResults(data) {
@@ -306,8 +373,7 @@ function renderScanResults(data) {
 
     const tbody = document.getElementById("file-list-body");
     if (!data.files || data.files.length === 0) {
-        tbody.innerHTML =
-            '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text-muted)">No media files found</td></tr>';
+        renderFileListMessage("No media files found");
         document.getElementById("btn-fix").disabled = true;
         return;
     }
