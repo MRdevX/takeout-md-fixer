@@ -5,12 +5,11 @@ import (
 	"io/fs"
 	"path/filepath"
 	"strings"
-
-	"takeout-md-fixer/internal/pathkey"
 )
 
 // ScanFolder walks root recursively and lists media files with optional JSON sidecars,
 // then counts JSON files that were not linked to any media (orphans), excluding known non-sidecar names.
+// Filesystem errors on individual paths (permissions, broken symlinks, etc.) are skipped so the rest of the tree still scans.
 func ScanFolder(root string) (*ScanResult, error) {
 	if root == "" {
 		return nil, fmt.Errorf("no folder path provided")
@@ -22,15 +21,14 @@ func ScanFolder(root string) (*ScanResult, error) {
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return err
+			return nil
 		}
 		if d.IsDir() {
 			return nil
 		}
-
-		info, err := d.Info()
-		if err != nil {
-			return err
+		info, errInfo := d.Info()
+		if errInfo != nil {
+			return nil
 		}
 
 		// macOS AppleDouble resource forks (._filename) masquerade as media + .json; JSON is binary, not Takeout.
@@ -50,7 +48,7 @@ func ScanFolder(root string) (*ScanResult, error) {
 				mf.JsonPath = jsonPath
 				mf.HasJson = true
 				result.WithJson++
-				if k := pathkey.Normalize(jsonPath); k != "" {
+				if k := normalizePathKey(jsonPath); k != "" {
 					linkedJSON[k] = struct{}{}
 				}
 			} else {
@@ -76,7 +74,7 @@ func ScanFolder(root string) (*ScanResult, error) {
 		if b == "metadata.json" || b == "print-subscriptions.json" {
 			continue
 		}
-		k := pathkey.Normalize(path)
+		k := normalizePathKey(path)
 		if k == "" {
 			continue
 		}
@@ -87,4 +85,12 @@ func ScanFolder(root string) (*ScanResult, error) {
 	}
 
 	return result, nil
+}
+
+func normalizePathKey(p string) string {
+	abs, err := filepath.Abs(p)
+	if err != nil {
+		return ""
+	}
+	return strings.ToLower(filepath.Clean(abs))
 }

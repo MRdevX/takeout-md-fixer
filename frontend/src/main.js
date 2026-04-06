@@ -54,6 +54,32 @@ let exiftoolOk = true;
 
 const aboutModal = document.getElementById("about-modal");
 const exiftoolWarningEl = document.getElementById("exiftool-warning");
+const scanErrorBanner = document.getElementById("scan-error-banner");
+const scanErrorMsg = document.getElementById("scan-error-msg");
+
+function hideScanErrorBanner() {
+    scanErrorBanner?.classList.add("hidden");
+}
+
+function showScanErrorBanner(message) {
+    if (!scanErrorBanner || !scanErrorMsg) return;
+    scanErrorMsg.textContent = message;
+    scanErrorBanner.classList.remove("hidden");
+}
+
+/** @param {unknown} err */
+function formatErrorMessage(err) {
+    if (err == null) return "Something went wrong.";
+    if (typeof err === "string") return err;
+    if (typeof err === "object" && err !== null && "message" in err && typeof err.message === "string" && err.message) {
+        return err.message;
+    }
+    try {
+        return JSON.stringify(err);
+    } catch {
+        return String(err);
+    }
+}
 
 async function updateCheckpointHint() {
     if (!checkpointHint || !chkResumeFix) return;
@@ -148,6 +174,7 @@ aboutModal.addEventListener("click", (e) => {
 
 document.getElementById("btn-select").addEventListener("click", async () => {
     try {
+        hideScanErrorBanner();
         const path = await MetadataService.SelectFolder();
         if (!path) return;
         currentPath = path;
@@ -167,6 +194,12 @@ document.getElementById("btn-select").addEventListener("click", async () => {
         await updateCheckpointHint();
     } catch (err) {
         console.error("SelectFolder/Scan error:", err);
+        scanData = null;
+        currentPath = "";
+        showScanErrorBanner(
+            "Could not open or scan that folder. " + formatErrorMessage(err)
+        );
+        showView("welcome");
     }
 });
 
