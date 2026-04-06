@@ -12,6 +12,8 @@ Leaving Google Photos, Takeout files didn’t match what I’d seen in the app. 
 
 Stack: Go, [Wails v3](https://v3.wails.io/), [Vite](https://vitejs.dev/) + vanilla JS, [go-exiftool](https://github.com/barasher/go-exiftool). ExifTool is installed by you.
 
+The `build/android` and `build/ios` trees are standard Wails v3 scaffolding for mobile targets. Releases from this repo are **desktop-only** (macOS and Windows); use those folders only if you extend the project for Android or iOS.
+
 ## Resume and checkpoints
 
 If you stop a fix early or quit the app, progress is stored in a hidden file named `.takeout-md-fixer-checkpoint.json` inside the folder you selected. On the next run, enable **Continue where you left off** to skip files already processed. Delete that file if you want a full fix from scratch with the same folder.
@@ -25,9 +27,23 @@ If you stop a fix early or quit the app, progress is stored in a hidden file nam
 
 ## Develop
 
+From the repository root (uses [`build/config.yml`](build/config.yml)):
+
 ```bash
-wails3 dev
+wails3 dev -config ./build/config.yml
 ```
+
+## Changing Go APIs or types
+
+The frontend bindings under [`frontend/bindings/`](frontend/bindings/) are generated. After you change exported methods on [`MetadataService`](internal/service/metadata.go) or JSON-tagged types used from the UI, regenerate them with the same Wails v3 version as in [`go.mod`](go.mod):
+
+```bash
+wails3 generate bindings -f '-tags production -trimpath -buildvcs=false -ldflags="-w -s"' -clean=true
+```
+
+Then rebuild the frontend (`npm run build` in `frontend/`) before a production build.
+
+`FixMetadata` returns as soon as the fix **starts**; the UI listens for `fix-progress` and a final `fix-complete` event (payload type `FixComplete` in [`internal/service/complete.go`](internal/service/complete.go)).
 
 ## Build
 

@@ -34,7 +34,7 @@ func NewWriter() (*Writer, error) {
 // Close releases ExifTool resources.
 func (w *Writer) Close() {
 	if w.et != nil {
-		w.et.Close()
+		_ = w.et.Close()
 	}
 }
 

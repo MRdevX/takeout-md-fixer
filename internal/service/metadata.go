@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"sync"
@@ -9,8 +8,12 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 
 	"takeout-md-fixer/internal/exif"
+	"takeout-md-fixer/internal/pathkey"
 	"takeout-md-fixer/internal/takeout"
 )
+
+// Checkpoint flush interval: balances crash safety vs disk I/O on large libraries.
+const checkpointFlushEveryN = 25
 
 // MetadataService exposes folder scan and metadata fix to the Wails frontend.
 type MetadataService struct {
@@ -66,7 +69,7 @@ func (s *MetadataService) FixPause() error {
 	s.fixMu.Lock()
 	defer s.fixMu.Unlock()
 	if !s.fixActive {
-		return errors.New("no fix in progress")
+		return ErrNoFixInProgress
 	}
 	s.fixPaused = true
 	return nil
@@ -77,7 +80,7 @@ func (s *MetadataService) FixResume() error {
 	s.fixMu.Lock()
 	defer s.fixMu.Unlock()
 	if !s.fixActive {
-		return errors.New("no fix in progress")
+		return ErrNoFixInProgress
 	}
 	s.fixPaused = false
 	if s.fixCond != nil {
@@ -91,7 +94,7 @@ func (s *MetadataService) FixAbort() error {
 	s.fixMu.Lock()
 	defer s.fixMu.Unlock()
 	if !s.fixActive {
-		return errors.New("no fix in progress")
+		return ErrNoFixInProgress
 	}
 	s.fixAbort = true
 	s.fixPaused = false
@@ -105,7 +108,7 @@ func (s *MetadataService) beginFixSession() error {
 	s.fixMu.Lock()
 	defer s.fixMu.Unlock()
 	if s.fixActive {
-		return errors.New("a fix is already in progress")
+		return ErrFixAlreadyActive
 	}
 	if s.fixCond == nil {
 		s.fixCond = sync.NewCond(&s.fixMu)
@@ -143,41 +146,67 @@ func (s *MetadataService) shouldAbort() bool {
 
 // FixMetadata writes EXIF from sidecar JSON and optionally removes sidecar files.
 // If resume is true, completed paths from .takeout-md-fixer-checkpoint.json are skipped.
-func (s *MetadataService) FixMetadata(folderPath string, deleteJsonSidecars bool, resume bool) (*takeout.FixResult, error) {
+//
+// Work runs in a background goroutine so the Wails runtime can process other calls and events.
+// The UI should listen for "fix-progress" and a final "fix-complete" event (see FixComplete).
+// A non-nil error means the job could not be started (e.g. another fix is active).
+func (s *MetadataService) FixMetadata(folderPath string, deleteJsonSidecars bool, resume bool) error {
 	if err := s.beginFixSession(); err != nil {
-		return nil, err
+		return err
 	}
+	go s.runFix(folderPath, deleteJsonSidecars, resume)
+	return nil
+}
+
+func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, resume bool) {
 	defer s.endFixSession()
+
+	app := application.Get()
+	emitComplete := func(c FixComplete) {
+		app.Event.Emit("fix-complete", c)
+	}
 
 	scanResult, err := takeout.ScanFolder(folderPath)
 	if err != nil {
-		return nil, err
+		emitComplete(FixComplete{Error: err.Error()})
+		return
 	}
 
 	if !resume {
 		if err := clearCheckpoint(folderPath); err != nil {
-			return nil, err
+			emitComplete(FixComplete{Error: err.Error()})
+			return
 		}
 	}
 
 	completedByNorm, err := loadCheckpointState(folderPath, deleteJsonSidecars)
 	if err != nil {
-		return nil, err
+		emitComplete(FixComplete{Error: err.Error()})
+		return
 	}
 	if completedByNorm == nil {
 		completedByNorm = make(map[string]string)
 	}
 
-	app := application.Get()
 	writer, err := exif.NewWriter()
 	if err != nil {
-		return nil, err
+		emitComplete(FixComplete{Error: err.Error()})
+		return
 	}
 	defer writer.Close()
 
 	result := &takeout.FixResult{
 		Total:   len(scanResult.Files),
 		Resumed: resume && len(completedByNorm) > 0,
+	}
+
+	sinceFlush := 0
+	flushPending := func() error {
+		if sinceFlush == 0 {
+			return nil
+		}
+		sinceFlush = 0
+		return writeCheckpoint(folderPath, deleteJsonSidecars, completedByNorm)
 	}
 
 	for i, mf := range scanResult.Files {
@@ -191,7 +220,6 @@ func (s *MetadataService) FixMetadata(folderPath string, deleteJsonSidecars bool
 			Current: i + 1,
 			Total:   result.Total,
 			File:    mf.Name,
-			Paused:  false,
 		}
 
 		if CheckpointContains(completedByNorm, mf.Path) {
@@ -238,9 +266,14 @@ func (s *MetadataService) FixMetadata(folderPath string, deleteJsonSidecars bool
 
 		abs, err := filepath.Abs(mf.Path)
 		if err == nil {
-			completedByNorm[normPathKey(abs)] = abs
-			if err := writeCheckpoint(folderPath, deleteJsonSidecars, completedByNorm); err != nil {
-				return nil, err
+			completedByNorm[pathkey.Normalize(abs)] = abs
+			sinceFlush++
+			if sinceFlush >= checkpointFlushEveryN {
+				if err := writeCheckpoint(folderPath, deleteJsonSidecars, completedByNorm); err != nil {
+					emitComplete(FixComplete{Error: err.Error()})
+					return
+				}
+				sinceFlush = 0
 			}
 		}
 
@@ -254,13 +287,20 @@ func (s *MetadataService) FixMetadata(folderPath string, deleteJsonSidecars bool
 		}
 	}
 
+	if err := flushPending(); err != nil {
+		emitComplete(FixComplete{Error: err.Error()})
+		return
+	}
+
 	if result.Aborted {
-		return result, nil
+		emitComplete(FixComplete{Result: result})
+		return
 	}
 
 	if err := clearCheckpoint(folderPath); err != nil {
-		return nil, err
+		emitComplete(FixComplete{Error: err.Error()})
+		return
 	}
 
-	return result, nil
+	emitComplete(FixComplete{Result: result})
 }

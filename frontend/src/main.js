@@ -199,13 +199,27 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
     document.getElementById("progress-text").textContent = "0 / 0";
     document.getElementById("progress-file").textContent = "";
 
+    const offComplete = Events.Once("fix-complete", (event) => {
+        const payload = event.data;
+        if (payload.error) {
+            console.error("Fix run failed:", payload.error);
+            resetProcessingControls();
+            showView("scan");
+            void updateCheckpointHint();
+            return;
+        }
+        if (payload.result) {
+            renderDoneResults(payload.result);
+            showView("done");
+        }
+    });
+
     try {
         const deleteJson = document.getElementById("chk-delete-json").checked;
         const resume = chkResumeFix?.checked === true;
-        const result = await MetadataService.FixMetadata(currentPath, deleteJson, resume);
-        renderDoneResults(result);
-        showView("done");
+        await MetadataService.FixMetadata(currentPath, deleteJson, resume);
     } catch (err) {
+        offComplete();
         console.error("FixMetadata error:", err);
         resetProcessingControls();
         showView("scan");
@@ -226,9 +240,6 @@ document.getElementById("btn-restart").addEventListener("click", () => {
 
 Events.On("fix-progress", (event) => {
     const p = event.data;
-    if (p.paused) {
-        setProcessingPaused(true);
-    }
     const pct = Math.round((p.current / p.total) * 100);
     document.getElementById("progress-bar").style.width = pct + "%";
     document.getElementById("progress-text").textContent = `${p.current} / ${p.total}`;

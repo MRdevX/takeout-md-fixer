@@ -1,0 +1,17 @@
+version: "2"
+
+run:
+  skip-dirs:
+    - build
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+issues:
+  max-same-issues: 50

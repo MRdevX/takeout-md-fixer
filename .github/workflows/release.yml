@@ -100,6 +100,12 @@ jobs:
           cd build
           wails3 update build-assets -name takeout-md-fixer -binaryname takeout-md-fixer -config config.yml -dir .
 
+      - name: Install frontend dependencies (lockfile)
+        run: |
+          set -euo pipefail
+          cd frontend
+          npm ci
+
       - name: Package (macOS)
         run: wails3 package
 

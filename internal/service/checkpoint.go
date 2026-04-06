@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"takeout-md-fixer/internal/pathkey"
 )
 
 const checkpointFileName = ".takeout-md-fixer-checkpoint.json"
@@ -77,7 +79,7 @@ func loadCheckpointState(folder string, deleteJsonSidecars bool) (map[string]str
 		if err != nil {
 			continue
 		}
-		k := normPathKey(abs)
+		k := pathkey.Normalize(abs)
 		out[k] = abs
 	}
 	return out, nil
@@ -121,19 +123,11 @@ func clearCheckpoint(folder string) error {
 	return nil
 }
 
-func normPathKey(p string) string {
-	abs, err := filepath.Abs(p)
-	if err != nil {
-		return strings.ToLower(filepath.Clean(p))
-	}
-	return strings.ToLower(filepath.Clean(abs))
-}
-
 // CheckpointContains reports whether mediaPath is marked completed.
 func CheckpointContains(completed map[string]string, mediaPath string) bool {
 	if completed == nil {
 		return false
 	}
-	_, ok := completed[normPathKey(mediaPath)]
+	_, ok := completed[pathkey.Normalize(mediaPath)]
 	return ok
 }
