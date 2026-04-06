@@ -34,7 +34,7 @@ From the repository root (uses [`build/config.yml`](build/config.yml)):
 wails3 dev -config ./build/config.yml
 ```
 
-[`main.go`](main.go) embeds [`frontend/dist`](frontend/dist), which is listed in [`.gitignore`](.gitignore). Until that directory exists (e.g. after `npm run build` in `frontend/`, or via `wails3 build`), `go vet ./...`, `go test ./...`, and `go build` on the root module will fail with **no matching files found** for the embed pattern.
+[`main.go`](main.go) embeds [`frontend/dist`](frontend/dist), which is listed in [`.gitignore`](.gitignore). Until that directory exists (e.g. after `npm run build` in `frontend/`, or via `wails3 build`), `go vet ./...`, `go test ./...`, and `go build` on the root module will fail with **no matching files found** for the embed pattern. CI runs **Build frontend (for go:embed)** before `go vet` and `go test` in [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 ## Changing Go APIs or types
 

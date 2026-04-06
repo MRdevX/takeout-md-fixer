@@ -10,7 +10,7 @@ linters:
     - unused
   exclusions:
     paths:
-      - build
+      - ^build/.*
 
 issues:
   max-same-issues: 50

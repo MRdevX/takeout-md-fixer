@@ -225,6 +225,7 @@ btnFixStop?.addEventListener("click", () => {
 
 document.getElementById("btn-fix").addEventListener("click", async () => {
     if (!currentPath || !exiftoolOk) return;
+    hideScanErrorBanner();
     showView("processing");
     resetProcessingControls();
 
@@ -236,9 +237,20 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
         const payload = event.data;
         if (payload.error) {
             console.error("Fix run failed:", payload.error);
+            showScanErrorBanner("Fix did not finish. " + payload.error);
             resetProcessingControls();
             showView("scan");
-            void updateCheckpointHint();
+            void (async () => {
+                await updateCheckpointHint();
+                const path = currentPath;
+                if (!path) return;
+                try {
+                    scanData = await MetadataService.ScanFolder(path);
+                    renderScanResults(scanData);
+                } catch (e) {
+                    console.error("Rescan after fix error:", e);
+                }
+            })();
             return;
         }
         if (payload.result) {
@@ -254,9 +266,16 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
     } catch (err) {
         offComplete();
         console.error("FixMetadata error:", err);
+        showScanErrorBanner("Could not start the fix. " + formatErrorMessage(err));
         resetProcessingControls();
         showView("scan");
         await updateCheckpointHint();
+        try {
+            scanData = await MetadataService.ScanFolder(currentPath);
+            renderScanResults(scanData);
+        } catch (e) {
+            console.error("Rescan after FixMetadata error:", e);
+        }
     }
 });
 

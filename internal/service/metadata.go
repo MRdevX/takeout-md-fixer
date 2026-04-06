@@ -270,7 +270,7 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 			sinceFlush++
 			if sinceFlush >= checkpointFlushEveryN {
 				if err := writeCheckpoint(folderPath, deleteJsonSidecars, completedByNorm); err != nil {
-					emitComplete(FixComplete{Error: err.Error()})
+					emitComplete(FixComplete{Result: result, Error: err.Error()})
 					return
 				}
 				sinceFlush = 0
@@ -288,7 +288,7 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 	}
 
 	if err := flushPending(); err != nil {
-		emitComplete(FixComplete{Error: err.Error()})
+		emitComplete(FixComplete{Result: result, Error: err.Error()})
 		return
 	}
 
@@ -298,7 +298,7 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 	}
 
 	if err := clearCheckpoint(folderPath); err != nil {
-		emitComplete(FixComplete{Error: err.Error()})
+		emitComplete(FixComplete{Result: result, Error: err.Error()})
 		return
 	}
 
