@@ -19,11 +19,11 @@ jobs:
           go-version-file: go.mod
 
       # main.go embeds frontend/dist; dist is gitignored, so it must exist before vet/test compile main.
+      # Omit cache: npm until frontend/package-lock.json is always present in the checkout;
+      # otherwise post-job cache save fails path validation (see actions/setup-node).
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Build frontend (for go:embed)
         working-directory: frontend
