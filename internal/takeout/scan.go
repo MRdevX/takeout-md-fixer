@@ -2,13 +2,14 @@ package takeout
 
 import (
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"strings"
 )
 
 // ScanFolder walks root recursively and lists media files with optional JSON sidecars,
 // then counts JSON files that were not linked to any media (orphans), excluding known non-sidecar names.
+// Filesystem errors on individual paths (permissions, broken symlinks, etc.) are skipped so the rest of the tree still scans.
 func ScanFolder(root string) (*ScanResult, error) {
 	if root == "" {
 		return nil, fmt.Errorf("no folder path provided")
@@ -16,12 +17,17 @@ func ScanFolder(root string) (*ScanResult, error) {
 
 	result := &ScanResult{FolderPath: root}
 	linkedJSON := make(map[string]struct{})
+	var jsonCandidates []string
 
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
-		if info.IsDir() {
+		if d.IsDir() {
+			return nil
+		}
+		info, errInfo := d.Info()
+		if errInfo != nil {
 			return nil
 		}
 
@@ -31,59 +37,52 @@ func ScanFolder(root string) (*ScanResult, error) {
 		}
 
 		ext := strings.ToLower(filepath.Ext(path))
-		if !MediaExtensions[ext] {
+		if MediaExtensions[ext] {
+			mf := MediaFile{
+				Path:   path,
+				Name:   info.Name(),
+				Status: "pending",
+			}
+
+			if jsonPath := SidecarPath(path); jsonPath != "" {
+				mf.JsonPath = jsonPath
+				mf.HasJson = true
+				result.WithJson++
+				if k := normalizePathKey(jsonPath); k != "" {
+					linkedJSON[k] = struct{}{}
+				}
+			} else {
+				result.WithoutJson++
+			}
+
+			result.Files = append(result.Files, mf)
+			result.TotalMedia++
 			return nil
 		}
 
-		mf := MediaFile{
-			Path:   path,
-			Name:   info.Name(),
-			Status: "pending",
+		if strings.HasSuffix(strings.ToLower(path), ".json") {
+			jsonCandidates = append(jsonCandidates, path)
 		}
-
-		if jsonPath := SidecarPath(path); jsonPath != "" {
-			mf.JsonPath = jsonPath
-			mf.HasJson = true
-			result.WithJson++
-			if k := normalizePathKey(jsonPath); k != "" {
-				linkedJSON[k] = struct{}{}
-			}
-		} else {
-			result.WithoutJson++
-		}
-
-		result.Files = append(result.Files, mf)
-		result.TotalMedia++
 		return nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error scanning folder: %w", err)
 	}
 
-	_ = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() {
-			return nil
-		}
-		if strings.HasPrefix(info.Name(), "._") {
-			return nil
-		}
-		if !strings.HasSuffix(strings.ToLower(path), ".json") {
-			return nil
-		}
+	for _, path := range jsonCandidates {
 		b := strings.ToLower(filepath.Base(path))
 		if b == "metadata.json" || b == "print-subscriptions.json" {
-			return nil
+			continue
 		}
 		k := normalizePathKey(path)
 		if k == "" {
-			return nil
+			continue
 		}
 		if _, ok := linkedJSON[k]; ok {
-			return nil
+			continue
 		}
 		result.OrphanJson++
-		return nil
-	})
+	}
 
 	return result, nil
 }

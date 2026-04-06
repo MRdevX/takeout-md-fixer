@@ -49,15 +49,17 @@ export function FixCheckpointAvailable(folderPath) {
 /**
  * FixMetadata writes EXIF from sidecar JSON and optionally removes sidecar files.
  * If resume is true, completed paths from .takeout-md-fixer-checkpoint.json are skipped.
+ * 
+ * Work runs in a background goroutine so the Wails runtime can process other calls and events.
+ * The UI should listen for "fix-progress" and a final "fix-complete" event (see FixComplete).
+ * A non-nil error means the job could not be started (e.g. another fix is active).
  * @param {string} folderPath
  * @param {boolean} deleteJsonSidecars
  * @param {boolean} resume
- * @returns {$CancellablePromise<takeout$0.FixResult | null>}
+ * @returns {$CancellablePromise<void>}
  */
 export function FixMetadata(folderPath, deleteJsonSidecars, resume) {
-    return $Call.ByID(682951661, folderPath, deleteJsonSidecars, resume).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType2($result);
-    }));
+    return $Call.ByID(682951661, folderPath, deleteJsonSidecars, resume);
 }
 
 /**
@@ -83,7 +85,7 @@ export function FixResume() {
  */
 export function ScanFolder(folderPath) {
     return $Call.ByID(952712716, folderPath).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType4($result);
+        return $$createType2($result);
     }));
 }
 
@@ -97,7 +99,5 @@ export function SelectFolder() {
 
 // Private type creation functions
 const $$createType0 = $models.ExiftoolStatus.createFrom;
-const $$createType1 = takeout$0.FixResult.createFrom;
+const $$createType1 = takeout$0.ScanResult.createFrom;
 const $$createType2 = $Create.Nullable($$createType1);
-const $$createType3 = takeout$0.ScanResult.createFrom;
-const $$createType4 = $Create.Nullable($$createType3);

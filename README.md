@@ -1,32 +1,31 @@
 # Takeout Metadata Fixer
 
-**Google Takeout is great. The metadata on your files afterward? Not always.** This app reads the JSON sidecars next to your photos and videos, then writes dates, GPS, and related fields back into the files with [ExifTool](https://exiftool.org/), so imports to iCloud, a NAS, or elsewhere look right.
+Desktop app for **Google Takeout** exports: it finds JSON sidecars next to your photos and videos and writes dates, GPS, and related fields into the files with [ExifTool](https://exiftool.org/). That way imports into iCloud, a NAS, or other tools see sensible dates and locations.
 
-[![Go](https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white)](https://go.dev/) [![Wails](https://img.shields.io/badge/Wails_v3-27272a?style=flat-square&logo=wails&logoColor=white)](https://v3.wails.io/) [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/) [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](https://developer.mozilla.org/docs/Web/JavaScript) [![ExifTool](https://img.shields.io/badge/ExifTool-system-8B4513?style=flat-square)](https://exiftool.org/)
+You must install [ExifTool](https://exiftool.org/) yourself. The app resolves it from your `PATH` and common install locations (e.g. Homebrew and `/usr/local/bin` on macOS), which helps when the GUI does not see the same `PATH` as your terminal.
 
-**You need [ExifTool](https://exiftool.org/).** The app resolves it via `PATH` plus common install locations (e.g. Homebrew and `/usr/local/bin` on macOS), because GUI apps often do not inherit your shell `PATH`.
+## Download
 
-## Why I built this
+Prebuilt **macOS (DMG)** and **Windows (.exe)** builds are on [GitHub Releases](https://github.com/MRdevX/takeout-md-fixer/releases). Pushes to `main` trigger a release workflow that bumps the patch version from git tags and publishes artifacts plus a short changelog.
 
-Leaving Google Photos, Takeout files didn’t match what I’d seen in the app. I wrote this to fix metadata before moving the rest of my library.
+## Resuming
 
-Stack: Go, [Wails v3](https://v3.wails.io/), [Vite](https://vitejs.dev/) + vanilla JS, [go-exiftool](https://github.com/barasher/go-exiftool). ExifTool is installed by you.
-
-## Resume and checkpoints
-
-If you stop a fix early or quit the app, progress is stored in a hidden file named `.takeout-md-fixer-checkpoint.json` inside the folder you selected. On the next run, enable **Continue where you left off** to skip files already processed. Delete that file if you want a full fix from scratch with the same folder.
-
-## Before you start
-
-- [Go](https://go.dev/dl/) ([`go.mod`](go.mod))
-- [Node.js](https://nodejs.org/)
-- [Wails v3 CLI](https://v3.wails.io/) (`go install github.com/wailsapp/wails/v3/cmd/wails3@latest`)
-- [ExifTool](https://exiftool.org/) (see above)
+If you stop early or quit, progress is saved in a hidden file **`.takeout-md-fixer-checkpoint.json`** in the folder you selected. Next time, enable **Continue where you left off** to skip files already processed. Delete that file if you want a full pass from scratch on the same folder.
 
 ## Develop
 
+You need Go (see [`go.mod`](go.mod)), Node.js, the [Wails v3 CLI](https://v3.wails.io/) (`go install github.com/wailsapp/wails/v3/cmd/wails3@latest`), and ExifTool.
+
 ```bash
-wails3 dev
+wails3 dev -config ./build/config.yml
+```
+
+[`main.go`](main.go) embeds [`frontend/dist`](frontend/dist), which is gitignored. Before `go build`, `go vet`, or `go test` at the repo root, build the frontend (`npm ci` and `npm run build` in `frontend/`). CI does the same.
+
+If you change exported Go methods or JSON types used from the UI, regenerate [`frontend/bindings/`](frontend/bindings/) with the Wails version in `go.mod`, then rebuild the frontend:
+
+```bash
+wails3 generate bindings -f '-tags production -trimpath -buildvcs=false -ldflags="-w -s"' -clean=true
 ```
 
 ## Build
@@ -35,29 +34,16 @@ wails3 dev
 wails3 build
 ```
 
-Binary under `bin/`.
+Binaries land under `bin/`.
 
-## Local release (macOS DMG + Windows exe)
+Local release script (macOS DMG; Windows cross-compile where supported):
 
 ```bash
-chmod +x scripts/build-release.sh
-./scripts/build-release.sh
+bash scripts/build-release.sh
 ```
 
-Optional: `VERSION=x.y.z`. See `build/config.yml` and `bin/` for outputs.
+Optional: `VERSION=x.y.z`.
 
-## Releases
+---
 
-Pushes to `main` run [`.github/workflows/release.yml`](.github/workflows/release.yml): version bump from git tags, changelog, DMG + `takeout-md-fixer.exe`, GitHub Release.
-
-If this helped, fuel is welcome.
-
-<a href="https://www.buymeacoffee.com/mrdevx" title="Buy Me A Coffee"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee on buymeacoffee.com" width="217" height="60" /></a>
-
-## Author
-
-**Mahdi Rashidi**
-
-- [contact@mrashidi.me](mailto:contact@mrashidi.me)
-- [mrashidi.me](https://mrashidi.me)
-- [@MRdevX](https://github.com/MRdevX)
+**Mahdi Rashidi** — [contact@mrashidi.me](mailto:contact@mrashidi.me) · [mrashidi.me](https://mrashidi.me) · [GitHub](https://github.com/MRdevX) · [Buy Me a Coffee](https://www.buymeacoffee.com/mrdevx)

@@ -26,7 +26,6 @@ type MediaFile struct {
 	JsonPath string `json:"jsonPath"`
 	HasJson  bool   `json:"hasJson"`
 	Status   string `json:"status"`
-	Error    string `json:"error"`
 }
 
 type ScanResult struct {
@@ -43,7 +42,6 @@ type FixProgress struct {
 	Total   int    `json:"total"`
 	File    string `json:"file"`
 	Status  string `json:"status"`
-	Paused  bool   `json:"paused"`
 }
 
 type FixResult struct {

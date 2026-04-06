@@ -3,6 +3,8 @@ package service
 import (
 	"path/filepath"
 	"testing"
+
+	"takeout-md-fixer/internal/pathkey"
 )
 
 func TestCheckpointRoundTrip(t *testing.T) {
@@ -11,8 +13,8 @@ func TestCheckpointRoundTrip(t *testing.T) {
 	m1 := filepath.Join(dir, "a.jpg")
 	m2 := filepath.Join(dir, "b.jpg")
 	byNorm := map[string]string{
-		normPathKey(m1): m1,
-		normPathKey(m2): m2,
+		pathkey.Normalize(m1): m1,
+		pathkey.Normalize(m2): m2,
 	}
 	if err := writeCheckpoint(dir, false, byNorm); err != nil {
 		t.Fatal(err)
@@ -39,7 +41,7 @@ func TestCheckpointRoundTrip(t *testing.T) {
 func TestCheckpointDeleteJsonMismatch(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
-	byNorm := map[string]string{normPathKey(filepath.Join(dir, "a.jpg")): filepath.Join(dir, "a.jpg")}
+	byNorm := map[string]string{pathkey.Normalize(filepath.Join(dir, "a.jpg")): filepath.Join(dir, "a.jpg")}
 	if err := writeCheckpoint(dir, true, byNorm); err != nil {
 		t.Fatal(err)
 	}

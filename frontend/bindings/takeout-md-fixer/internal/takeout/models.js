@@ -6,83 +6,6 @@
 // @ts-ignore: Unused imports
 import { Create as $Create } from "@wailsio/runtime";
 
-export class FixResult {
-    /**
-     * Creates a new FixResult instance.
-     * @param {Partial<FixResult>} [$$source = {}] - The source object to create the FixResult.
-     */
-    constructor($$source = {}) {
-        if (!("total" in $$source)) {
-            /**
-             * @member
-             * @type {number}
-             */
-            this["total"] = 0;
-        }
-        if (!("success" in $$source)) {
-            /**
-             * @member
-             * @type {number}
-             */
-            this["success"] = 0;
-        }
-        if (!("failed" in $$source)) {
-            /**
-             * @member
-             * @type {number}
-             */
-            this["failed"] = 0;
-        }
-        if (!("skipped" in $$source)) {
-            /**
-             * @member
-             * @type {number}
-             */
-            this["skipped"] = 0;
-        }
-        if (!("jsonDeleted" in $$source)) {
-            /**
-             * @member
-             * @type {number}
-             */
-            this["jsonDeleted"] = 0;
-        }
-        if (!("jsonDeleteFailed" in $$source)) {
-            /**
-             * @member
-             * @type {number}
-             */
-            this["jsonDeleteFailed"] = 0;
-        }
-        if (!("aborted" in $$source)) {
-            /**
-             * @member
-             * @type {boolean}
-             */
-            this["aborted"] = false;
-        }
-        if (!("resumed" in $$source)) {
-            /**
-             * @member
-             * @type {boolean}
-             */
-            this["resumed"] = false;
-        }
-
-        Object.assign(this, $$source);
-    }
-
-    /**
-     * Creates a new FixResult instance from a string or object.
-     * @param {any} [$$source = {}]
-     * @returns {FixResult}
-     */
-    static createFrom($$source = {}) {
-        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        return new FixResult(/** @type {Partial<FixResult>} */($$parsedSource));
-    }
-}
-
 export class MediaFile {
     /**
      * Creates a new MediaFile instance.
@@ -123,13 +46,6 @@ export class MediaFile {
              * @type {string}
              */
             this["status"] = "";
-        }
-        if (!("error" in $$source)) {
-            /**
-             * @member
-             * @type {string}
-             */
-            this["error"] = "";
         }
 
         Object.assign(this, $$source);

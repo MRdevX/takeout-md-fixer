@@ -54,6 +54,32 @@ let exiftoolOk = true;
 
 const aboutModal = document.getElementById("about-modal");
 const exiftoolWarningEl = document.getElementById("exiftool-warning");
+const scanErrorBanner = document.getElementById("scan-error-banner");
+const scanErrorMsg = document.getElementById("scan-error-msg");
+
+function hideScanErrorBanner() {
+    scanErrorBanner?.classList.add("hidden");
+}
+
+function showScanErrorBanner(message) {
+    if (!scanErrorBanner || !scanErrorMsg) return;
+    scanErrorMsg.textContent = message;
+    scanErrorBanner.classList.remove("hidden");
+}
+
+/** @param {unknown} err */
+function formatErrorMessage(err) {
+    if (err == null) return "Something went wrong.";
+    if (typeof err === "string") return err;
+    if (typeof err === "object" && err !== null && "message" in err && typeof err.message === "string" && err.message) {
+        return err.message;
+    }
+    try {
+        return JSON.stringify(err);
+    } catch {
+        return String(err);
+    }
+}
 
 async function updateCheckpointHint() {
     if (!checkpointHint || !chkResumeFix) return;
@@ -148,6 +174,7 @@ aboutModal.addEventListener("click", (e) => {
 
 document.getElementById("btn-select").addEventListener("click", async () => {
     try {
+        hideScanErrorBanner();
         const path = await MetadataService.SelectFolder();
         if (!path) return;
         currentPath = path;
@@ -167,6 +194,12 @@ document.getElementById("btn-select").addEventListener("click", async () => {
         await updateCheckpointHint();
     } catch (err) {
         console.error("SelectFolder/Scan error:", err);
+        scanData = null;
+        currentPath = "";
+        showScanErrorBanner(
+            "Could not open or scan that folder. " + formatErrorMessage(err)
+        );
+        showView("welcome");
     }
 });
 
@@ -192,6 +225,7 @@ btnFixStop?.addEventListener("click", () => {
 
 document.getElementById("btn-fix").addEventListener("click", async () => {
     if (!currentPath || !exiftoolOk) return;
+    hideScanErrorBanner();
     showView("processing");
     resetProcessingControls();
 
@@ -199,17 +233,49 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
     document.getElementById("progress-text").textContent = "0 / 0";
     document.getElementById("progress-file").textContent = "";
 
+    const offComplete = Events.Once("fix-complete", (event) => {
+        const payload = event.data;
+        if (payload.error) {
+            console.error("Fix run failed:", payload.error);
+            showScanErrorBanner("Fix did not finish. " + payload.error);
+            resetProcessingControls();
+            showView("scan");
+            void (async () => {
+                await updateCheckpointHint();
+                const path = currentPath;
+                if (!path) return;
+                try {
+                    scanData = await MetadataService.ScanFolder(path);
+                    renderScanResults(scanData);
+                } catch (e) {
+                    console.error("Rescan after fix error:", e);
+                }
+            })();
+            return;
+        }
+        if (payload.result) {
+            renderDoneResults(payload.result);
+            showView("done");
+        }
+    });
+
     try {
         const deleteJson = document.getElementById("chk-delete-json").checked;
         const resume = chkResumeFix?.checked === true;
-        const result = await MetadataService.FixMetadata(currentPath, deleteJson, resume);
-        renderDoneResults(result);
-        showView("done");
+        await MetadataService.FixMetadata(currentPath, deleteJson, resume);
     } catch (err) {
+        offComplete();
         console.error("FixMetadata error:", err);
+        showScanErrorBanner("Could not start the fix. " + formatErrorMessage(err));
         resetProcessingControls();
         showView("scan");
         await updateCheckpointHint();
+        try {
+            scanData = await MetadataService.ScanFolder(currentPath);
+            renderScanResults(scanData);
+        } catch (e) {
+            console.error("Rescan after FixMetadata error:", e);
+        }
     }
 });
 
@@ -226,9 +292,6 @@ document.getElementById("btn-restart").addEventListener("click", () => {
 
 Events.On("fix-progress", (event) => {
     const p = event.data;
-    if (p.paused) {
-        setProcessingPaused(true);
-    }
     const pct = Math.round((p.current / p.total) * 100);
     document.getElementById("progress-bar").style.width = pct + "%";
     document.getElementById("progress-text").textContent = `${p.current} / ${p.total}`;

@@ -9,6 +9,9 @@ import (
 	"takeout-md-fixer/internal/service"
 )
 
+// Desktop app entrypoint using Wails v3 (application, services, assets). See:
+// https://v3.wails.io/
+
 //go:embed all:frontend/dist
 var assets embed.FS
 
