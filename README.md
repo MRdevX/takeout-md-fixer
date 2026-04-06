@@ -33,6 +33,8 @@ From the repository root (uses [`build/config.yml`](build/config.yml)):
 wails3 dev -config ./build/config.yml
 ```
 
+[`main.go`](main.go) embeds [`frontend/dist`](frontend/dist), which is listed in [`.gitignore`](.gitignore). Until that directory exists (e.g. after `npm run build` in `frontend/`, or via `wails3 build`), `go vet ./...`, `go test ./...`, and `go build` on the root module will fail with **no matching files found** for the embed pattern.
+
 ## Changing Go APIs or types
 
 The frontend bindings under [`frontend/bindings/`](frontend/bindings/) are generated. After you change exported methods on [`MetadataService`](internal/service/metadata.go) or JSON-tagged types used from the UI, regenerate them with the same Wails v3 version as in [`go.mod`](go.mod):

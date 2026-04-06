@@ -18,6 +18,20 @@ jobs:
         with:
           go-version-file: go.mod
 
+      # main.go embeds frontend/dist; dist is gitignored, so it must exist before vet/test compile main.
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend (for go:embed)
+        run: |
+          set -euo pipefail
+          cd frontend
+          npm ci
+          npm run build
+
       - name: Verify formatting
         run: test -z "$(gofmt -l .)"
 
