@@ -28,6 +28,10 @@
     --red-soft: #fef2f2;
     --radius: 10px;
     --radius-sm: 6px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
     --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
     --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
     --shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.12);
@@ -106,6 +110,13 @@ html.platform-macos .app-topbar {
     transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
+.toolbar-btn {
+    min-height: 34px;
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
 .about-link:hover {
     color: var(--accent);
     border-color: var(--accent-ring);
@@ -114,14 +125,13 @@ html.platform-macos .app-topbar {
 
 .exiftool-banner {
     flex-shrink: 0;
-    margin: 12px 24px 0;
+    margin: var(--space-3) var(--space-6) 0;
     padding: 14px 16px;
     border-radius: var(--radius);
     background: var(--red-soft);
     border: 1px solid rgba(220, 38, 38, 0.25);
-    max-width: 560px;
-    align-self: center;
-    width: calc(100% - 48px);
+    align-self: stretch;
+    width: auto;
 }
 
 .exiftool-banner.hidden {
@@ -361,11 +371,23 @@ html.platform-macos .app-topbar {
     display: none;
     flex-direction: column;
     height: 100%;
-    padding: 24px;
+    padding: var(--space-6);
 }
 
 .view.active {
     display: flex;
+}
+
+.content-column {
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+}
+
+.scan-layout {
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
 }
 
 .hero {
@@ -375,7 +397,7 @@ html.platform-macos .app-topbar {
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 18px;
+    gap: 20px;
 }
 
 h1 {
@@ -466,14 +488,36 @@ h2 {
 }
 
 .header-bar {
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
     padding-top: 20px;
+}
+
+.scan-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
+}
+
+.scan-header-copy h2 {
+    margin-bottom: 2px;
+}
+
+.scan-subtitle {
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+.scan-header #btn-fix {
+    flex-shrink: 0;
 }
 
 .folder-path {
     color: var(--text-muted);
     font-size: 0.75rem;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
     word-break: break-all;
 }
 
@@ -481,7 +525,7 @@ h2 {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-4);
 }
 
 .stat-card {
@@ -522,7 +566,7 @@ h2 {
     color: var(--text-muted);
     line-height: 1.5;
     max-width: 32rem;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
     padding: 10px 12px;
     border-radius: var(--radius-sm);
     background: var(--accent-soft);
@@ -533,12 +577,16 @@ h2 {
     display: none;
 }
 
-.actions {
-    margin-bottom: 16px;
+.scan-options {
+    margin-bottom: var(--space-4);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
 }
 
 .checkbox-row {
@@ -599,6 +647,7 @@ h2 {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.8125rem;
+    table-layout: fixed;
 }
 
 .file-list thead {
@@ -621,6 +670,17 @@ h2 {
 .file-list td {
     padding: 8px 12px;
     border-bottom: 1px solid var(--border);
+}
+
+.file-list th:nth-child(1),
+.file-list td:nth-child(1) {
+    width: 58%;
+}
+
+.file-list td:first-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .file-list-message {
@@ -652,6 +712,10 @@ h2 {
 
 .file-list tbody tr:last-child td {
     border-bottom: none;
+}
+
+.file-list tbody tr:nth-child(even) {
+    background: rgba(15, 23, 42, 0.02);
 }
 
 .file-list tr:hover {
@@ -703,6 +767,16 @@ h2 {
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+}
+
+.processing-controls-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.processing-stop {
+    margin-left: 8px;
 }
 
 .processing-controls .btn.hidden {
