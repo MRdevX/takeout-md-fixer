@@ -43,13 +43,16 @@ type FixProgress struct {
 	Total   int    `json:"total"`
 	File    string `json:"file"`
 	Status  string `json:"status"`
+	Paused  bool   `json:"paused"`
 }
 
 type FixResult struct {
-	Total            int `json:"total"`
-	Success          int `json:"success"`
-	Failed           int `json:"failed"`
-	Skipped          int `json:"skipped"`
-	JsonDeleted      int `json:"jsonDeleted"`
-	JsonDeleteFailed int `json:"jsonDeleteFailed"`
+	Total            int  `json:"total"`
+	Success          int  `json:"success"`
+	Failed           int  `json:"failed"`
+	Skipped          int  `json:"skipped"`
+	JsonDeleted      int  `json:"jsonDeleted"`
+	JsonDeleteFailed int  `json:"jsonDeleteFailed"`
+	Aborted          bool `json:"aborted"`
+	Resumed          bool `json:"resumed"`
 }

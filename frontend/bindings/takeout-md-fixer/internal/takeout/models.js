@@ -54,6 +54,20 @@ export class FixResult {
              */
             this["jsonDeleteFailed"] = 0;
         }
+        if (!("aborted" in $$source)) {
+            /**
+             * @member
+             * @type {boolean}
+             */
+            this["aborted"] = false;
+        }
+        if (!("resumed" in $$source)) {
+            /**
+             * @member
+             * @type {boolean}
+             */
+            this["resumed"] = false;
+        }
 
         Object.assign(this, $$source);
     }

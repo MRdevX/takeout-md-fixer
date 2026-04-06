@@ -30,15 +30,50 @@ export function ExiftoolCheck() {
 }
 
 /**
+ * FixAbort stops the current fix after the current file finishes (or immediately if waiting on pause).
+ * @returns {$CancellablePromise<void>}
+ */
+export function FixAbort() {
+    return $Call.ByID(269939194);
+}
+
+/**
+ * FixCheckpointAvailable reports whether a saved checkpoint exists for this folder (resume possible).
+ * @param {string} folderPath
+ * @returns {$CancellablePromise<boolean>}
+ */
+export function FixCheckpointAvailable(folderPath) {
+    return $Call.ByID(587844845, folderPath);
+}
+
+/**
  * FixMetadata writes EXIF from sidecar JSON and optionally removes sidecar files.
+ * If resume is true, completed paths from .takeout-md-fixer-checkpoint.json are skipped.
  * @param {string} folderPath
  * @param {boolean} deleteJsonSidecars
+ * @param {boolean} resume
  * @returns {$CancellablePromise<takeout$0.FixResult | null>}
  */
-export function FixMetadata(folderPath, deleteJsonSidecars) {
-    return $Call.ByID(682951661, folderPath, deleteJsonSidecars).then(/** @type {($result: any) => any} */(($result) => {
+export function FixMetadata(folderPath, deleteJsonSidecars, resume) {
+    return $Call.ByID(682951661, folderPath, deleteJsonSidecars, resume).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType2($result);
     }));
+}
+
+/**
+ * FixPause pauses the current fix between files.
+ * @returns {$CancellablePromise<void>}
+ */
+export function FixPause() {
+    return $Call.ByID(3356104986);
+}
+
+/**
+ * FixResume continues a paused fix.
+ * @returns {$CancellablePromise<void>}
+ */
+export function FixResume() {
+    return $Call.ByID(3438800187);
 }
 
 /**

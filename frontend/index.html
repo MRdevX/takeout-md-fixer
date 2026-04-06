@@ -51,10 +51,15 @@
                 <span class="stat-label">JSON not linked</span>
             </div>
         </div>
+        <p id="checkpoint-hint" class="checkpoint-hint hidden" role="status"></p>
         <div class="actions">
             <label class="checkbox-row">
                 <input type="checkbox" id="chk-delete-json"/>
                 <span>Delete sidecar JSON after a successful fix</span>
+            </label>
+            <label class="checkbox-row">
+                <input type="checkbox" id="chk-resume-fix" disabled/>
+                <span>Continue where you left off (uses saved progress in this folder)</span>
             </label>
             <button id="btn-fix" class="btn btn-primary">Fix metadata</button>
         </div>
@@ -74,7 +79,14 @@
 
     <div id="view-processing" class="view">
         <div class="processing-content">
-            <h2>Working…</h2>
+            <div class="processing-header">
+                <h2 id="processing-title">Working…</h2>
+                <div class="processing-controls" role="toolbar" aria-label="Fix progress controls">
+                    <button type="button" id="btn-fix-pause" class="btn btn-ghost btn-sm">Pause</button>
+                    <button type="button" id="btn-fix-resume" class="btn btn-ghost btn-sm hidden">Resume</button>
+                    <button type="button" id="btn-fix-stop" class="btn btn-ghost btn-sm">Stop</button>
+                </div>
+            </div>
             <div class="progress-bar-container">
                 <div class="progress-bar" id="progress-bar"></div>
             </div>
@@ -87,7 +99,8 @@
 
     <div id="view-done" class="view">
         <div class="hero">
-            <h2>Done</h2>
+            <h2 id="done-title">Done</h2>
+            <p id="done-resume-note" class="done-resume-note hidden"></p>
             <div class="stats-row">
                 <div class="stat-card stat-ok">
                     <span class="stat-value" id="result-success">0</span>
