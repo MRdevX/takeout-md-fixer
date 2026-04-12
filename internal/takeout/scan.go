@@ -87,6 +87,35 @@ func ScanFolder(root string) (*ScanResult, error) {
 	return result, nil
 }
 
+// ListAlbumMetadataJSON walks root and returns paths to Google Takeout per-album metadata.json files
+// (album title only; not photo sidecars). Skips AppleDouble "._*" files.
+func ListAlbumMetadataJSON(root string) ([]string, error) {
+	if root == "" {
+		return nil, nil
+	}
+	var paths []string
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return nil
+		}
+		if d.IsDir() {
+			return nil
+		}
+		name := d.Name()
+		if strings.HasPrefix(name, "._") {
+			return nil
+		}
+		if strings.EqualFold(name, "metadata.json") {
+			paths = append(paths, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return paths, nil
+}
+
 func normalizePathKey(p string) string {
 	abs, err := filepath.Abs(p)
 	if err != nil {

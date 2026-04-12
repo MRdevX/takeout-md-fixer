@@ -145,6 +145,8 @@ func (s *MetadataService) shouldAbort() bool {
 }
 
 // FixMetadata writes EXIF from sidecar JSON and optionally removes sidecar files.
+// Sidecar deletion runs once at the end: each JSON is removed only after every media file
+// that referenced it has been written (including items skipped via resume checkpoint).
 // If resume is true, completed paths from .takeout-md-fixer-checkpoint.json are skipped.
 //
 // Work runs in a background goroutine so the Wails runtime can process other calls and events.
@@ -252,19 +254,6 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 			continue
 		}
 
-		if deleteJsonSidecars && mf.JsonPath != "" {
-			for _, p := range takeout.SidecarDeletionPaths(mf.Path, mf.JsonPath) {
-				if err := os.Remove(p); err != nil {
-					if os.IsNotExist(err) {
-						continue
-					}
-					result.JsonDeleteFailed++
-				} else {
-					result.JsonDeleted++
-				}
-			}
-		}
-
 		abs, err := filepath.Abs(mf.Path)
 		if err == nil {
 			completedByNorm[pathkey.Normalize(abs)] = abs
@@ -293,6 +282,11 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 		return
 	}
 
+	if deleteJsonSidecars && !result.Aborted {
+		deleteSharedSidecarsAfterFix(scanResult, completedByNorm, result)
+		deleteAlbumMetadataJSONFiles(folderPath, result)
+	}
+
 	if result.Aborted {
 		emitComplete(FixComplete{Result: result})
 		return
@@ -304,4 +298,74 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 	}
 
 	emitComplete(FixComplete{Result: result})
+}
+
+// deleteSharedSidecarsAfterFix removes Takeout JSON for each sidecar only after every media file
+// that used that sidecar has been written successfully (including paths already in the checkpoint from resume).
+func deleteSharedSidecarsAfterFix(scanResult *takeout.ScanResult, completedByNorm map[string]string, result *takeout.FixResult) {
+	byJSON := make(map[string][]takeout.MediaFile)
+	for _, mf := range scanResult.Files {
+		if !mf.HasJson || mf.JsonPath == "" {
+			continue
+		}
+		k := pathkey.Normalize(mf.JsonPath)
+		byJSON[k] = append(byJSON[k], mf)
+	}
+
+	removed := make(map[string]struct{})
+	for _, group := range byJSON {
+		allDone := true
+		for _, mf := range group {
+			if !CheckpointContains(completedByNorm, mf.Path) {
+				allDone = false
+				break
+			}
+		}
+		if !allDone {
+			continue
+		}
+
+		jsonPath := group[0].JsonPath
+		mediaPaths := make([]string, len(group))
+		for i := range group {
+			mediaPaths[i] = group[i].Path
+		}
+		rep := takeout.SidecarCleanupRepresentative(mediaPaths, jsonPath)
+		if rep == "" {
+			continue
+		}
+		for _, p := range takeout.SidecarCleanupPaths(rep, jsonPath) {
+			cp := filepath.Clean(p)
+			if _, ok := removed[cp]; ok {
+				continue
+			}
+			if err := os.Remove(p); err != nil {
+				if os.IsNotExist(err) {
+					continue
+				}
+				result.JsonDeleteFailed++
+				continue
+			}
+			removed[cp] = struct{}{}
+			result.JsonDeleted++
+		}
+	}
+}
+
+// deleteAlbumMetadataJSONFiles removes per-album metadata.json files (album title) under the Takeout tree.
+func deleteAlbumMetadataJSONFiles(folderPath string, result *takeout.FixResult) {
+	paths, err := takeout.ListAlbumMetadataJSON(folderPath)
+	if err != nil {
+		return
+	}
+	for _, p := range paths {
+		if err := os.Remove(p); err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			result.JsonDeleteFailed++
+			continue
+		}
+		result.JsonDeleted++
+	}
 }

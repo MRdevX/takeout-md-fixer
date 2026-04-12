@@ -281,23 +281,17 @@ func TestSidecarBorrowedFromDifferentMedia_livePhoto(t *testing.T) {
 	}
 }
 
-func TestSidecarDeletionPaths_stillWithMotionSiblingDeletesNothing(t *testing.T) {
+func TestSidecarCleanupRepresentative_prefersJsonOwner(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 	jpg := filepath.Join(dir, "IMG_5175.JPG")
 	mp4 := filepath.Join(dir, "IMG_5175.MP4")
 	sup := filepath.Join(dir, "IMG_5175.JPG.supplemental-metadata.json")
-	for _, p := range []string{jpg, mp4} {
-		if err := os.WriteFile(p, []byte("x"), 0o644); err != nil {
-			t.Fatal(err)
-		}
+	if got := SidecarCleanupRepresentative([]string{mp4, jpg}, sup); got != jpg {
+		t.Fatalf("got %q want %q", got, jpg)
 	}
-	if err := os.WriteFile(sup, []byte("{}"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	paths := SidecarDeletionPaths(jpg, sup)
-	if len(paths) != 0 {
-		t.Fatalf("expected no deletions for still when motion sibling exists (same-run MP4 needs JSON), got %#v", paths)
+	if got := SidecarCleanupRepresentative([]string{mp4}, sup); got != mp4 {
+		t.Fatalf("got %q want %q", got, mp4)
 	}
 }
 

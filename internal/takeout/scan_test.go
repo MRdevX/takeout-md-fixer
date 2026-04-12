@@ -75,3 +75,27 @@ func TestScanFolder_livePhotoJpgAndMp4BothHaveJson(t *testing.T) {
 		t.Fatalf("expected both JPG and MP4 HasJson true: %#v", byName)
 	}
 }
+
+func TestListAlbumMetadataJSON(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	sub := filepath.Join(dir, "Google Photos", "My Album")
+	if err := os.MkdirAll(sub, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	meta := filepath.Join(sub, "metadata.json")
+	if err := os.WriteFile(meta, []byte(`{"title":"My Album"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	photoMeta := filepath.Join(sub, "IMG_1.JPG.json")
+	if err := os.WriteFile(photoMeta, []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	paths, err := ListAlbumMetadataJSON(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(paths) != 1 || filepath.Clean(paths[0]) != filepath.Clean(meta) {
+		t.Fatalf("got %#v want single album metadata.json", paths)
+	}
+}

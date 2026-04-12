@@ -25,11 +25,6 @@ var pairedStillExtensions = []string{
 	".JPG", ".JPEG", ".jpg", ".jpeg", ".HEIC", ".heic",
 }
 
-// motionSiblingSuffixes lists motion file extensions to stat when checking for a Live Photo–style pair (case variants).
-var motionSiblingSuffixes = []string{
-	".mp4", ".MP4", ".mov", ".MOV", ".m4v", ".M4V", ".avi", ".AVI", ".mkv", ".MKV", ".3gp", ".3GP",
-}
-
 func prefixRunes(s string, n int) string {
 	if n <= 0 {
 		return ""
@@ -174,40 +169,27 @@ func SidecarBorrowedFromDifferentMedia(mediaPath, resolvedJsonPath string) bool 
 	return !strings.EqualFold(filepath.Base(mediaPath), owner)
 }
 
-// stillSharesMetadataWithMotion reports whether this file type can be the still half of a Google Takeout Live Photo pair.
-func stillSharesMetadataWithMotion(base string) bool {
-	switch strings.ToLower(filepath.Ext(base)) {
-	case ".jpg", ".jpeg", ".heic":
-		return true
-	default:
-		return false
+// SidecarCleanupRepresentative picks a media path for SidecarCleanupPaths when several files share one JSON
+// (e.g. Live Photo JPG + MP4). Prefer the file basename that owns the sidecar filename.
+func SidecarCleanupRepresentative(mediaPaths []string, resolvedJsonPath string) string {
+	if len(mediaPaths) == 0 {
+		return ""
 	}
-}
-
-// pairedMotionSiblingInDir is true when a motion file with the same basename stem exists (e.g. IMG_5175.JPG + IMG_5175.MP4).
-func pairedMotionSiblingInDir(dir, mediaPath string) bool {
-	if !stillSharesMetadataWithMotion(filepath.Base(mediaPath)) {
-		return false
+	owner := sidecarJSONOwnerBaseName(filepath.Base(resolvedJsonPath))
+	if owner == "" {
+		return mediaPaths[0]
 	}
-	base := filepath.Base(mediaPath)
-	ext := filepath.Ext(base)
-	nameNoExt := strings.TrimSuffix(base, ext)
-	for _, suf := range motionSiblingSuffixes {
-		if statOK(filepath.Join(dir, nameNoExt+suf)) {
-			return true
+	for _, p := range mediaPaths {
+		if strings.EqualFold(filepath.Base(p), owner) {
+			return p
 		}
 	}
-	return false
+	return mediaPaths[0]
 }
 
 // SidecarDeletionPaths returns JSON paths safe to remove after a successful write when the user opts in to deletion.
 // If metadata was borrowed from a paired still image’s sidecar, the resolved JSON path is omitted so the still keeps its companion file.
-// If this still has a paired motion file, nothing is deleted: processing the still first would otherwise remove JSON the motion row still needs in the same run.
 func SidecarDeletionPaths(mediaPath, resolvedJsonPath string) []string {
-	dir := filepath.Dir(mediaPath)
-	if pairedMotionSiblingInDir(dir, mediaPath) {
-		return nil
-	}
 	paths := SidecarCleanupPaths(mediaPath, resolvedJsonPath)
 	if !SidecarBorrowedFromDifferentMedia(mediaPath, resolvedJsonPath) {
 		return paths
