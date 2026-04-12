@@ -26,13 +26,13 @@ func TestCheckpointRoundTrip(t *testing.T) {
 	if len(loaded) != 2 {
 		t.Fatalf("want 2 entries, got %d", len(loaded))
 	}
-	if !CheckpointContains(loaded, m1) || !CheckpointContains(loaded, m2) {
+	if !checkpointContains(loaded, m1) || !checkpointContains(loaded, m2) {
 		t.Fatal("missing paths")
 	}
 	if err := clearCheckpoint(dir); err != nil {
 		t.Fatal(err)
 	}
-	ok, err := HasCheckpoint(dir)
+	ok, err := hasCheckpoint(dir)
 	if err != nil || ok {
 		t.Fatalf("checkpoint should be gone: ok=%v err=%v", ok, err)
 	}

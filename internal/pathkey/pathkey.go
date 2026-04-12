@@ -1,6 +1,6 @@
 // Package pathkey provides a single canonical string key for comparing filesystem paths
-// across packages (scanning, checkpoints). Keys are lowercased cleaned paths, with
-// filepath.Abs applied when possible.
+// across packages (scanning, checkpoints, orphan JSON linking). Keys are lowercased
+// cleaned paths, with filepath.Abs applied when possible (fallback: clean + lower).
 package pathkey
 
 import (

@@ -61,7 +61,7 @@ func (s *MetadataService) ScanFolder(folderPath string) (*takeout.ScanResult, er
 
 // FixCheckpointAvailable reports whether a saved checkpoint exists for this folder (resume possible).
 func (s *MetadataService) FixCheckpointAvailable(folderPath string) (bool, error) {
-	return HasCheckpoint(folderPath)
+	return hasCheckpoint(folderPath)
 }
 
 // FixPause pauses the current fix between files.
@@ -167,6 +167,9 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 	emitComplete := func(c FixComplete) {
 		app.Event.Emit("fix-complete", c)
 	}
+	emitProgress := func(p takeout.FixProgress) {
+		app.Event.Emit("fix-progress", p)
+	}
 
 	scanResult, err := takeout.ScanFolder(folderPath)
 	if err != nil {
@@ -195,7 +198,7 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 		emitComplete(FixComplete{Error: err.Error()})
 		return
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	result := &takeout.FixResult{
 		Total:   len(scanResult.Files),
@@ -224,17 +227,17 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 			File:    mf.Name,
 		}
 
-		if CheckpointContains(completedByNorm, mf.Path) {
+		if checkpointContains(completedByNorm, mf.Path) {
 			progress.Status = "resumed"
 			result.Success++
-			app.Event.Emit("fix-progress", progress)
+			emitProgress(progress)
 			continue
 		}
 
 		if !mf.HasJson {
 			progress.Status = "skipped"
 			result.Skipped++
-			app.Event.Emit("fix-progress", progress)
+			emitProgress(progress)
 			continue
 		}
 
@@ -242,7 +245,7 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 		if err != nil {
 			progress.Status = "error"
 			result.Failed++
-			app.Event.Emit("fix-progress", progress)
+			emitProgress(progress)
 			continue
 		}
 
@@ -250,7 +253,7 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 		if err := writer.WriteMetadata(mf.Path, meta); err != nil {
 			progress.Status = "error"
 			result.Failed++
-			app.Event.Emit("fix-progress", progress)
+			emitProgress(progress)
 			continue
 		}
 
@@ -269,7 +272,7 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 
 		progress.Status = "success"
 		result.Success++
-		app.Event.Emit("fix-progress", progress)
+		emitProgress(progress)
 
 		if s.shouldAbort() {
 			result.Aborted = true
@@ -316,7 +319,7 @@ func deleteSharedSidecarsAfterFix(scanResult *takeout.ScanResult, completedByNor
 	for _, group := range byJSON {
 		allDone := true
 		for _, mf := range group {
-			if !CheckpointContains(completedByNorm, mf.Path) {
+			if !checkpointContains(completedByNorm, mf.Path) {
 				allDone = false
 				break
 			}

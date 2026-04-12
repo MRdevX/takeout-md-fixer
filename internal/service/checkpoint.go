@@ -26,8 +26,8 @@ func checkpointPath(folder string) string {
 	return filepath.Join(folder, checkpointFileName)
 }
 
-// HasCheckpoint reports whether a checkpoint file exists for the folder.
-func HasCheckpoint(folder string) (bool, error) {
+// hasCheckpoint reports whether a checkpoint file exists for the folder.
+func hasCheckpoint(folder string) (bool, error) {
 	p := checkpointPath(folder)
 	_, err := os.Stat(p)
 	if err != nil {
@@ -123,8 +123,8 @@ func clearCheckpoint(folder string) error {
 	return nil
 }
 
-// CheckpointContains reports whether mediaPath is marked completed.
-func CheckpointContains(completed map[string]string, mediaPath string) bool {
+// checkpointContains reports whether mediaPath is marked completed.
+func checkpointContains(completed map[string]string, mediaPath string) bool {
 	if completed == nil {
 		return false
 	}

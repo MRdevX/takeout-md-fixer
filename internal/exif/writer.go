@@ -18,7 +18,7 @@ type Writer struct {
 	et *exiftool.Exiftool
 }
 
-// NewWriter starts an ExifTool session. Caller must Close when done.
+// NewWriter starts an ExifTool session. Caller should Close when done (errors are usually non-fatal after writes).
 func NewWriter() (*Writer, error) {
 	path, err := ResolveExiftoolPath()
 	if err != nil {
@@ -32,10 +32,13 @@ func NewWriter() (*Writer, error) {
 }
 
 // Close releases ExifTool resources.
-func (w *Writer) Close() {
-	if w.et != nil {
-		_ = w.et.Close()
+func (w *Writer) Close() error {
+	if w.et == nil {
+		return nil
 	}
+	err := w.et.Close()
+	w.et = nil
+	return err
 }
 
 // WriteMetadata writes EXIF/GPS and related tags from meta into mediaPath.
