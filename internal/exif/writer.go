@@ -92,6 +92,11 @@ func (w *Writer) WriteMetadata(mediaPath string, meta *takeout.TakeoutMeta) erro
 		fi.SetString("MediaModifyDate", dateStr)
 		fi.SetString("TrackCreateDate", dateStr)
 		fi.SetString("TrackModifyDate", dateStr)
+		// Explicit QuickTime group tags — some players and macOS rely on these for MP4/MOV.
+		fi.SetString("QuickTime:CreateDate", dateStr)
+		fi.SetString("QuickTime:ModifyDate", dateStr)
+		fi.SetString("ContentCreateDate", dateStr)
+		fi.SetString("ContentModifyDate", dateStr)
 	}
 
 	batch := []exiftool.FileMetadata{fi}
