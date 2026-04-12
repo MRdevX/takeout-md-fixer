@@ -2,6 +2,7 @@
 const RELEASES_URL = 'https://github.com/MRdevX/takeout-md-fixer/releases'
 const REPO_URL = 'https://github.com/MRdevX/takeout-md-fixer'
 const EXIFTOOL_URL = 'https://exiftool.org/'
+const BUY_ME_A_COFFEE_URL = 'https://www.buymeacoffee.com/mrdevx'
 </script>
 
 <template>
@@ -43,6 +44,10 @@ const EXIFTOOL_URL = 'https://exiftool.org/'
         <p class="landing-tertiary">
           Binaries and release notes:
           <a class="text-link" :href="RELEASES_URL" target="_blank" rel="noopener noreferrer">GitHub Releases</a>
+        </p>
+        <p class="landing-tertiary">
+          <a class="text-link" :href="BUY_ME_A_COFFEE_URL" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
+          if you find this useful.
         </p>
       </div>
     </main>
