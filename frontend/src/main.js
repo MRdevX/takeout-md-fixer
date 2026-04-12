@@ -16,18 +16,63 @@ const views = {
 const btnBack = document.getElementById("btn-back");
 
 const processingTitle = document.getElementById("processing-title");
+const processingSubtitle = document.getElementById("processing-subtitle");
 const progressBarEl = document.getElementById("progress-bar");
 const progressTextEl = document.getElementById("progress-text");
-const progressFileEl = document.getElementById("progress-file");
+const progressFileNameEl = document.getElementById("progress-file-name");
+const progressFilePathEl = document.getElementById("progress-file-path");
 const btnFixPause = document.getElementById("btn-fix-pause");
 const btnFixResume = document.getElementById("btn-fix-resume");
 const btnFixStop = document.getElementById("btn-fix-stop");
 const chkResumeFix = document.getElementById("chk-resume-fix");
 const checkpointHint = document.getElementById("checkpoint-hint");
 
+const PROCESSING_SUBTITLE_DEFAULT =
+    "Copying date and location into your files. This may take a few minutes. You can pause or stop; progress is saved.";
+const PROCESSING_SUBTITLE_PAUSED =
+    "Paused. Click Resume to continue, or Stop to finish after this file. Progress is saved.";
+
+const stepperItems = document.querySelectorAll("#app-stepper .stepper-item");
+
+/** @param {string} filePath */
+function basename(filePath) {
+    if (!filePath) return "";
+    const normalized = filePath.replace(/\\/g, "/");
+    const parts = normalized.split("/");
+    const last = parts.pop();
+    return last || filePath;
+}
+
+/**
+ * @param {"welcome" | "scan" | "processing" | "done"} name
+ */
+function updateStepper(name) {
+    if (!stepperItems.length) return;
+    stepperItems.forEach((el) => {
+        el.classList.remove("stepper-item--current", "stepper-item--complete");
+        el.removeAttribute("aria-current");
+    });
+    if (name === "welcome") {
+        stepperItems[0].classList.add("stepper-item--current");
+        stepperItems[0].setAttribute("aria-current", "step");
+    } else if (name === "scan") {
+        stepperItems[0].classList.add("stepper-item--complete");
+        stepperItems[1].classList.add("stepper-item--current");
+        stepperItems[1].setAttribute("aria-current", "step");
+    } else if (name === "processing") {
+        stepperItems[0].classList.add("stepper-item--complete");
+        stepperItems[1].classList.add("stepper-item--complete");
+        stepperItems[2].classList.add("stepper-item--current");
+        stepperItems[2].setAttribute("aria-current", "step");
+    } else if (name === "done") {
+        stepperItems.forEach((el) => el.classList.add("stepper-item--complete"));
+    }
+}
+
 function showView(name) {
     Object.values(views).forEach((v) => v.classList.remove("active"));
     views[name].classList.add("active");
+    updateStepper(name);
     const onScan = name === "scan";
     btnBack.hidden = !onScan;
     btnBack.setAttribute("aria-hidden", onScan ? "false" : "true");
@@ -37,10 +82,12 @@ function setProcessingPaused(paused) {
     if (!processingTitle || !btnFixPause || !btnFixResume) return;
     if (paused) {
         processingTitle.textContent = "Paused";
+        if (processingSubtitle) processingSubtitle.textContent = PROCESSING_SUBTITLE_PAUSED;
         btnFixPause.classList.add("hidden");
         btnFixResume.classList.remove("hidden");
     } else {
-        processingTitle.textContent = "Working…";
+        processingTitle.textContent = "Processing…";
+        if (processingSubtitle) processingSubtitle.textContent = PROCESSING_SUBTITLE_DEFAULT;
         btnFixPause.classList.remove("hidden");
         btnFixResume.classList.add("hidden");
     }
@@ -59,12 +106,52 @@ function setProgressUi(current, total, file = "") {
     if (progressBarEl) {
         progressBarEl.style.width = `${pct}%`;
         progressBarEl.setAttribute("aria-valuenow", String(pct));
+        const valText =
+            safeTotal > 0 ? `${boundedCurrent} of ${safeTotal} files, ${pct} percent` : `${pct} percent`;
+        progressBarEl.setAttribute("aria-valuetext", valText);
     }
     if (progressTextEl) {
-        progressTextEl.textContent = `${boundedCurrent} / ${safeTotal} (${pct}%)`;
+        progressTextEl.textContent =
+            safeTotal > 0 ? `${boundedCurrent} of ${safeTotal} (${pct}%)` : `${boundedCurrent} of ${safeTotal} (${pct}%)`;
     }
-    if (progressFileEl) {
-        progressFileEl.textContent = file;
+    const base = basename(file);
+    if (progressFileNameEl && progressFilePathEl) {
+        if (!file) {
+            progressFileNameEl.textContent = "";
+            progressFilePathEl.textContent = "";
+        } else {
+            progressFileNameEl.textContent = base;
+            progressFilePathEl.textContent = base === file ? "" : file;
+        }
+    }
+}
+
+/** Maps backend file status to short, friendly labels (badges). */
+const FILE_STATUS_LABELS = {
+    pending: "Waiting",
+    success: "OK",
+    error: "Failed",
+    skipped: "Skipped",
+};
+
+/** @param {string} status */
+function fileStatusLabel(status) {
+    return FILE_STATUS_LABELS[status] ?? status;
+}
+
+/** @param {string} status */
+function fileStatusTitle(status) {
+    switch (status) {
+        case "pending":
+            return "Waiting to update";
+        case "success":
+            return "Updated successfully";
+        case "error":
+            return "Update failed";
+        case "skipped":
+            return "Left unchanged (for example, already done or no companion file)";
+        default:
+            return "";
     }
 }
 
@@ -126,7 +213,7 @@ async function updateCheckpointHint() {
         const ok = await MetadataService.FixCheckpointAvailable(currentPath);
         if (ok) {
             checkpointHint.textContent =
-                "A previous run saved progress in this folder. Check “Continue where you left off” below to skip files already fixed, or delete the hidden file .takeout-md-fixer-checkpoint.json in this folder to start from scratch.";
+                "Last run did not finish. Turn on “Continue from last time” below to skip files already updated. To start from scratch, delete .takeout-md-fixer-checkpoint.json in this folder.";
             checkpointHint.classList.remove("hidden");
             chkResumeFix.disabled = false;
         } else {
@@ -150,7 +237,7 @@ async function refreshExiftoolStatus() {
             exiftoolWarningEl.classList.remove("hidden");
             const msgEl = exiftoolWarningEl.querySelector(".exiftool-banner-msg");
             if (msgEl) {
-                msgEl.textContent = st.message || "ExifTool was not found.";
+                msgEl.textContent = st.message || "ExifTool not found.";
             }
         } else {
             exiftoolWarningEl.classList.add("hidden");
@@ -252,8 +339,12 @@ document.getElementById("btn-select").addEventListener("click", async () => {
         showView("scan");
         views.scan?.setAttribute("aria-busy", "true");
         document.getElementById("btn-fix").disabled = true;
-        renderFileListMessage("Scanning...", true);
-        document.getElementById("scan-path").textContent = path;
+        renderFileListMessage("Scanning folder…", true);
+        const scanPathEl = document.getElementById("scan-path");
+        if (scanPathEl) {
+            scanPathEl.textContent = `Folder: ${basename(path)}`;
+            scanPathEl.setAttribute("title", path);
+        }
         document.getElementById("stat-total").textContent = "...";
         document.getElementById("stat-matched").textContent = "...";
         document.getElementById("stat-unmatched").textContent = "...";
@@ -266,9 +357,7 @@ document.getElementById("btn-select").addEventListener("click", async () => {
         console.error("SelectFolder/Scan error:", err);
         scanData = null;
         currentPath = "";
-        showScanErrorBanner(
-            "Could not open or scan that folder. " + formatErrorMessage(err)
-        );
+        showScanErrorBanner("We couldn’t open or scan that folder. " + formatErrorMessage(err));
         showView("welcome");
     } finally {
         views.scan?.setAttribute("aria-busy", "false");
@@ -307,7 +396,7 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
         const payload = event.data;
         if (payload.error) {
             console.error("Fix run failed:", payload.error);
-            showScanErrorBanner("Fix did not finish. " + payload.error);
+            showScanErrorBanner("The update didn’t finish. " + payload.error);
             resetProcessingControls();
             showView("scan");
             void (async () => {
@@ -336,7 +425,7 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
     } catch (err) {
         offComplete();
         console.error("FixMetadata error:", err);
-        showScanErrorBanner("Could not start the fix. " + formatErrorMessage(err));
+        showScanErrorBanner("We couldn’t start the update. " + formatErrorMessage(err));
         resetProcessingControls();
         showView("scan");
         await updateCheckpointHint();
@@ -371,21 +460,32 @@ function renderScanResults(data) {
     document.getElementById("stat-unmatched").textContent = data.withoutJson;
     document.getElementById("stat-orphan-json").textContent = data.orphanJson ?? 0;
 
+    const scanPathEl = document.getElementById("scan-path");
+    if (scanPathEl && data.folderPath) {
+        scanPathEl.textContent = `Folder: ${basename(data.folderPath)}`;
+        scanPathEl.setAttribute("title", data.folderPath);
+    }
+
     const tbody = document.getElementById("file-list-body");
     if (!data.files || data.files.length === 0) {
-        renderFileListMessage("No media files found");
+        renderFileListMessage("No photos or videos found in this folder.");
         document.getElementById("btn-fix").disabled = true;
         return;
     }
 
     tbody.innerHTML = data.files
-        .map(
-            (f) => `<tr>
+        .map((f) => {
+            const stLabel = escapeHtml(fileStatusLabel(f.status));
+            const stTitle = escapeHtml(fileStatusTitle(f.status));
+            const jsonCell = f.hasJson
+                ? '<span class="badge badge-yes" title="Google Takeout left a companion file with date and location">Yes</span>'
+                : '<span class="badge badge-no" title="No companion file — there is nothing to copy into this item">No</span>';
+            return `<tr>
             <td title="${escapeHtml(f.path)}">${escapeHtml(f.name)}</td>
-            <td>${f.hasJson ? '<span class="badge badge-yes">Yes</span>' : '<span class="badge badge-no">No</span>'}</td>
-            <td><span class="badge badge-${f.status}">${f.status}</span></td>
-        </tr>`
-        )
+            <td>${jsonCell}</td>
+            <td><span class="badge badge-${escapeHtml(f.status)}" title="${stTitle}">${stLabel}</span></td>
+        </tr>`;
+        })
         .join("");
 
     document.getElementById("btn-fix").disabled = data.withJson === 0 || !exiftoolOk;
@@ -394,13 +494,20 @@ function renderScanResults(data) {
 function renderDoneResults(result) {
     const doneTitle = document.getElementById("done-title");
     if (doneTitle) {
-        doneTitle.textContent = result.aborted ? "Stopped early" : "Done";
+        doneTitle.textContent = result.aborted ? "Stopped" : "Done";
+    }
+
+    const doneSummary = document.getElementById("done-summary");
+    if (doneSummary) {
+        doneSummary.textContent = result.aborted
+            ? "Stopped before all files were processed. Progress is saved. Click Start over, select the same folder, then turn on Continue from last time to finish."
+            : "Results for this run.";
     }
 
     const resumeNote = document.getElementById("done-resume-note");
     if (resumeNote) {
         if (result.resumed) {
-            resumeNote.textContent = "Continued from a previous interrupted run.";
+            resumeNote.textContent = "Continued from a previous run.";
             resumeNote.classList.remove("hidden");
         } else {
             resumeNote.textContent = "";
@@ -415,13 +522,15 @@ function renderDoneResults(result) {
     const extra = document.getElementById("result-json-delete");
     const parts = [];
     if (result.jsonDeleted > 0) {
-        parts.push(`Sidecars removed: ${result.jsonDeleted}`);
+        parts.push(
+            `Deleted ${result.jsonDeleted} extra info file${result.jsonDeleted === 1 ? "" : "s"} (dates and locations stay in your photos and videos).`
+        );
     }
     if (result.jsonDeleteFailed > 0) {
-        parts.push(`Could not remove: ${result.jsonDeleteFailed}`);
+        parts.push(`Could not delete ${result.jsonDeleteFailed} extra info file${result.jsonDeleteFailed === 1 ? "" : "s"}.`);
     }
     if (parts.length > 0) {
-        extra.textContent = parts.join(" · ");
+        extra.textContent = parts.join(" ");
         extra.classList.remove("hidden");
     } else {
         extra.textContent = "";
@@ -436,3 +545,4 @@ function escapeHtml(str) {
 }
 
 refreshExiftoolStatus();
+updateStepper("welcome");
