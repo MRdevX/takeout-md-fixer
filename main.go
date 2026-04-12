@@ -15,6 +15,15 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+// Default window size fits the stepper + review summary + options without manual resizing.
+// Minimum size keeps the 720px content column and stepper usable (horizontal scroll avoided).
+const (
+	windowWidth     = 1000
+	windowHeight    = 820
+	windowMinWidth  = 720
+	windowMinHeight = 640
+)
+
 func main() {
 	app := application.New(application.Options{
 		Name:        "Takeout Metadata Fixer",
@@ -31,9 +40,11 @@ func main() {
 	})
 
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:  "Takeout Metadata Fixer",
-		Width:  900,
-		Height: 600,
+		Title:     "Takeout Metadata Fixer",
+		Width:     windowWidth,
+		Height:    windowHeight,
+		MinWidth:  windowMinWidth,
+		MinHeight: windowMinHeight,
 		Mac: application.MacWindow{
 			InvisibleTitleBarHeight: 50,
 			Backdrop:                application.MacBackdropTranslucent,

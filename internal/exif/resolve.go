@@ -25,8 +25,7 @@ func ResolveExiftoolPath() (string, error) {
 	}
 	p, err := exec.LookPath(name)
 	if err != nil {
-		return "", fmt.Errorf("ExifTool was not found. Install it from https://exiftool.org/ (e.g. Homebrew or the official package) " +
-			"so `exiftool` is in a standard location or on your system PATH")
+		return "", fmt.Errorf("ExifTool not found. Install from https://exiftool.org/ and ensure exiftool is on your PATH")
 	}
 	return p, nil
 }

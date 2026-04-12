@@ -10,7 +10,7 @@ Prebuilt **macOS (DMG)** and **Windows (.exe)** builds are on [GitHub Releases](
 
 ## Resuming
 
-If you stop early or quit, progress is saved in a hidden file **`.takeout-md-fixer-checkpoint.json`** in the folder you selected. Next time, enable **Continue where you left off** to skip files already processed. Delete that file if you want a full pass from scratch on the same folder.
+If you stop early or quit, progress is saved in a hidden file **`.takeout-md-fixer-checkpoint.json`** in the folder you selected. The next time you open that folder in the app, it **resumes automatically** and skips files already processed. Delete that file if you want a full pass from scratch on the same folder.
 
 ## Develop
 
@@ -24,12 +24,12 @@ wails3 dev -config ./build/config.yml
 
 ### Go packages (where to change what)
 
-| Area | Package | Notes |
-|------|---------|--------|
-| Wails API, fix job, pause/resume, checkpoints | [`internal/service`](internal/service) | Emits app events `fix-progress` and `fix-complete`; checkpoint file `.takeout-md-fixer-checkpoint.json` lives in the chosen Takeout folder. |
-| Scanning, sidecar resolution, Takeout JSON types | [`internal/takeout`](internal/takeout) | New filename patterns or JSON fields usually start here. |
-| ExifTool invocation and tag mapping | [`internal/exif`](internal/exif) | New EXIF / video date tags. |
-| Path comparison keys (scan vs checkpoint) | [`internal/pathkey`](internal/pathkey) | Single normalization used across scan and checkpoint maps. |
+| Area                                             | Package                                | Notes                                                                                                                                       |
+| ------------------------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Wails API, fix job, pause/resume, checkpoints    | [`internal/service`](internal/service) | Emits app events `fix-progress` and `fix-complete`; checkpoint file `.takeout-md-fixer-checkpoint.json` lives in the chosen Takeout folder. |
+| Scanning, sidecar resolution, Takeout JSON types | [`internal/takeout`](internal/takeout) | New filename patterns or JSON fields usually start here.                                                                                    |
+| ExifTool invocation and tag mapping              | [`internal/exif`](internal/exif)       | New EXIF / video date tags.                                                                                                                 |
+| Path comparison keys (scan vs checkpoint)        | [`internal/pathkey`](internal/pathkey) | Single normalization used across scan and checkpoint maps.                                                                                  |
 
 If you change exported Go methods or JSON types used from the UI, regenerate [`frontend/bindings/`](frontend/bindings/) with the Wails version in `go.mod`, then rebuild the frontend:
 

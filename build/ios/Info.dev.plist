@@ -7,7 +7,7 @@
 		<key>CFBundleExecutable</key>
 		<string>takeout-md-fixer</string>
 		<key>CFBundleGetInfoString</key>
-		<string>Open-source Takeout metadata fixer — mrashidi.me</string>
+		<string>Open-source Takeout metadata fixer, mrashidi.me</string>
 		<key>CFBundleIdentifier</key>
 		<string>io.github.takeout-md-fixer.app.dev</string>
 		<key>CFBundleName</key>

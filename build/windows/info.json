@@ -9,7 +9,7 @@
 			"FileDescription": "Apply Google Takeout JSON metadata to photos and videos with ExifTool",
 			"LegalCopyright": "(c) 2026 Mahdi Rashidi",
 			"ProductName": "Takeout Metadata Fixer",
-			"Comments": "Open-source Takeout metadata fixer — mrashidi.me"
+			"Comments": "Open-source Takeout metadata fixer, mrashidi.me"
 		}
 	}
 }

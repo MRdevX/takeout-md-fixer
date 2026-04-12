@@ -65,10 +65,10 @@ func loadCheckpointState(folder string, deleteJsonSidecars bool) (map[string]str
 		return nil, err
 	}
 	if !strings.EqualFold(filepath.Clean(cpFolder), filepath.Clean(folderAbs)) {
-		return nil, errors.New("checkpoint folder path does not match")
+		return nil, errors.New("checkpoint is for a different folder")
 	}
 	if c.DeleteJsonSidecars != deleteJsonSidecars {
-		return nil, errors.New("checkpoint was created with a different sidecar deletion setting; run without resume or delete the checkpoint file")
+		return nil, errors.New("checkpoint used a different delete-sidecar setting; remove the checkpoint file or match that setting")
 	}
 	out := make(map[string]string, len(c.CompletedPaths))
 	for _, path := range c.CompletedPaths {
