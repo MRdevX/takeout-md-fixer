@@ -197,7 +197,8 @@ jobs:
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v7
         with:
-          name: windows
+          # One name per matrix leg — v7 rejects reusing the same artifact name across jobs (409).
+          name: windows-${{ matrix.arch }}
           path: bin/takeout-md-fixer-windows-${{ matrix.arch }}.exe
 
   publish:
@@ -219,7 +220,8 @@ jobs:
       - name: Download Windows artifacts
         uses: actions/download-artifact@v8
         with:
-          name: windows
+          pattern: windows-*
+          merge-multiple: true
           path: dist/windows
 
       - name: Create GitHub Release
