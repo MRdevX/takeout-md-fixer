@@ -8,43 +8,32 @@ const BUY_ME_A_COFFEE_URL = 'https://www.buymeacoffee.com/mrdevx'
 <template>
   <div class="page">
     <header class="site-header content-column">
-      <span class="site-title">Takeout Metadata Fixer</span>
-      <a
-        :href="REPO_URL"
-        class="about-link toolbar-btn"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        GitHub
-      </a>
+      <a :href="REPO_URL" class="text-link header-link" target="_blank" rel="noopener noreferrer">GitHub</a>
     </header>
 
     <main class="content-column">
       <div class="hero">
         <h1>Takeout Metadata Fixer</h1>
-        <p class="subtitle">
-          Copies date and location from Google Takeout <code class="inline-code">.json</code> sidecars into your photos and
-          videos so other apps show them correctly.
+        <p class="lead">
+          Desktop app for Google Takeout: reads <code class="inline-code">.json</code> sidecars next to your photos and
+          videos and writes dates, GPS, and related metadata into the files with ExifTool. That way imports into iCloud, a
+          NAS, or other tools see sensible dates and locations.
         </p>
-        <p class="subtitle-trust">
+        <p class="lead">
           <strong>Writes to your files.</strong> Use a copy of your library if you want to be safe.
         </p>
 
-        <div class="landing-note" role="note">
-          <strong>ExifTool</strong> must be installed on your system; the desktop app uses it to update metadata. See
+        <aside class="landing-note" aria-label="ExifTool requirement">
+          <strong>ExifTool</strong> must be installed on your system; the app uses it to update metadata. See
           <a class="text-link" :href="EXIFTOOL_URL" target="_blank" rel="noopener noreferrer">exiftool.org</a> for install
           steps.
-        </div>
+        </aside>
 
         <div class="landing-actions">
           <a :href="RELEASES_URL" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Download</a>
-          <a :href="REPO_URL" class="about-link toolbar-btn" target="_blank" rel="noopener noreferrer">View source</a>
         </div>
+        <p class="landing-hint">Prebuilt macOS (DMG) and Windows builds on GitHub Releases.</p>
 
-        <p class="landing-tertiary">
-          Binaries and release notes:
-          <a class="text-link" :href="RELEASES_URL" target="_blank" rel="noopener noreferrer">GitHub Releases</a>
-        </p>
         <p class="landing-tertiary">
           <a class="text-link" :href="BUY_ME_A_COFFEE_URL" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
           if you find this useful.
@@ -53,13 +42,3 @@ const BUY_ME_A_COFFEE_URL = 'https://www.buymeacoffee.com/mrdevx'
     </main>
   </div>
 </template>
-
-<style scoped>
-.inline-code {
-  font-size: 0.88em;
-  background: var(--bg-subtle);
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-</style>
