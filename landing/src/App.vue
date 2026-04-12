@@ -4,7 +4,10 @@ import { computed, ref } from 'vue'
 const RELEASES_URL = 'https://github.com/MRdevX/takeout-md-fixer/releases'
 const REPO_URL = 'https://github.com/MRdevX/takeout-md-fixer'
 const EXIFTOOL_URL = 'https://exiftool.org/'
-const BUY_ME_A_COFFEE_URL = 'https://www.buymeacoffee.com/mrdevx'
+const SITE_URL = 'https://mrashidi.me'
+const COPYRIGHT_HOLDER = 'Mahdi Rashidi'
+
+const year = new Date().getFullYear()
 
 const SCREENSHOTS = [
   {
@@ -159,15 +162,17 @@ function onCarouselKeydown(e: KeyboardEvent) {
           >
         </div>
         <p class="landing-hint">Prebuilt macOS (DMG) and Windows builds on GitHub Releases.</p>
-
-        <p class="landing-tertiary">
-          <a class="text-link" :href="BUY_ME_A_COFFEE_URL" target="_blank" rel="noopener noreferrer"
-            >Buy me a coffee</a
-          >
-          if you find this useful.
-        </p>
       </div>
     </main>
+
+    <footer class="site-footer content-column">
+      <p class="footer-site">
+        <a class="text-link" :href="SITE_URL" target="_blank" rel="noopener noreferrer"
+          >mrashidi.me</a
+        >
+      </p>
+      <p class="footer-copy">© {{ year }} {{ COPYRIGHT_HOLDER }}. All rights reserved.</p>
+    </footer>
   </div>
 </template>
 
