@@ -244,6 +244,7 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 			continue
 		}
 
+		// Each media path is updated independently (including Live Photo motion files that borrow JSON from the still).
 		if err := writer.WriteMetadata(mf.Path, meta); err != nil {
 			progress.Status = "error"
 			result.Failed++
@@ -252,7 +253,7 @@ func (s *MetadataService) runFix(folderPath string, deleteJsonSidecars bool, res
 		}
 
 		if deleteJsonSidecars && mf.JsonPath != "" {
-			for _, p := range takeout.SidecarCleanupPaths(mf.Path, mf.JsonPath) {
+			for _, p := range takeout.SidecarDeletionPaths(mf.Path, mf.JsonPath) {
 				if err := os.Remove(p); err != nil {
 					if os.IsNotExist(err) {
 						continue

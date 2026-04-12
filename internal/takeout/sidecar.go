@@ -13,6 +13,23 @@ const (
 	longBasenameRunes            = 47
 )
 
+// motionExtensionsPairStill lists video extensions that may appear as the motion
+// half of a Google Photos Live Photo–style pair; metadata often lives only on the still file.
+var motionExtensionsPairStill = map[string]bool{
+	".mp4": true, ".mov": true, ".avi": true, ".mkv": true, ".m4v": true, ".3gp": true,
+}
+
+// pairedStillExtensions is the order we probe for a sibling still next to a motion file.
+// Uppercase variants are tried first (common on iOS / Google Takeout) so returned paths match on disk.
+var pairedStillExtensions = []string{
+	".JPG", ".JPEG", ".jpg", ".jpeg", ".HEIC", ".heic",
+}
+
+// motionSiblingSuffixes lists motion file extensions to stat when checking for a Live Photo–style pair (case variants).
+var motionSiblingSuffixes = []string{
+	".mp4", ".MP4", ".mov", ".MOV", ".m4v", ".M4V", ".avi", ".AVI", ".mkv", ".MKV", ".3gp", ".3GP",
+}
+
 func prefixRunes(s string, n int) string {
 	if n <= 0 {
 		return ""
@@ -39,8 +56,9 @@ func statOK(path string) bool {
 //  5. Duplicate "name (n).ext" / "name(n).ext":
 //     a. dir + stem + ".json" — e.g. IMG(1).jpg → IMG.json
 //     b. dir + stem + ext + "(n)" + ".json" — e.g. IMG.jpg(1).json
-//  6. Directory scan: truncated supplemental sidecars (*.supplemental*.json)
-//  7. Google Photos edited export: IMG_0378-edited.JPG uses the same metadata as IMG_0378.JPG
+//  6. Live Photo–style motion file: same stem as a still (e.g. IMG_5175.MP4 uses IMG_5175.JPG.supplemental-metadata.json)
+//  7. Directory scan: truncated supplemental sidecars (*.supplemental*.json)
+//  8. Google Photos edited export: IMG_0378-edited.JPG uses the same metadata as IMG_0378.JPG
 //     (fallback only when no sidecar exists for the edited filename itself).
 func SidecarPath(mediaPath string) string {
 	dir := filepath.Dir(mediaPath)
@@ -80,6 +98,10 @@ func SidecarPath(mediaPath string) string {
 		}
 	}
 
+	if p := sidecarFromPairedStill(dir, nameNoExt, ext); p != "" {
+		return p
+	}
+
 	if p := sidecarSupplementalFromDir(dir, base); p != "" {
 		return p
 	}
@@ -94,6 +116,111 @@ func SidecarPath(mediaPath string) string {
 	}
 
 	return ""
+}
+
+// sidecarFromPairedStill resolves JSON that lives next to a sibling still image (Google Takeout Live Photo exports).
+func sidecarFromPairedStill(dir, nameNoExt, mediaExt string) string {
+	if !motionExtensionsPairStill[strings.ToLower(mediaExt)] {
+		return ""
+	}
+	for _, stillExt := range pairedStillExtensions {
+		stillBase := nameNoExt + stillExt
+		stillPath := filepath.Join(dir, stillBase)
+		for _, c := range []string{
+			stillPath + ".json",
+			stillPath + ".supplemental-metadata.json",
+		} {
+			if statOK(c) {
+				return c
+			}
+		}
+		if utf8.RuneCountInString(stillBase) >= longBasenameRunes {
+			trunc := filepath.Join(dir, prefixRunes(stillBase, takeoutBasenameTruncateRunes)+".json")
+			if statOK(trunc) {
+				return trunc
+			}
+		}
+	}
+	return ""
+}
+
+// sidecarJSONOwnerBaseName returns the media basename a Takeout JSON file belongs to.
+func sidecarJSONOwnerBaseName(jsonBase string) string {
+	switch {
+	case strings.HasSuffix(jsonBase, ".supplemental-metadata.json"):
+		return strings.TrimSuffix(jsonBase, ".supplemental-metadata.json")
+	case strings.HasSuffix(strings.ToLower(jsonBase), ".json"):
+		return strings.TrimSuffix(jsonBase, ".json")
+	default:
+		return ""
+	}
+}
+
+// SidecarBorrowedFromDifferentMedia reports whether resolvedJsonPath describes metadata for another file
+// (e.g. IMG_5175.MP4 using IMG_5175.JPG.supplemental-metadata.json). In that case the JSON must not be deleted
+// when fixing only the motion file.
+func SidecarBorrowedFromDifferentMedia(mediaPath, resolvedJsonPath string) bool {
+	if resolvedJsonPath == "" {
+		return false
+	}
+	ext := filepath.Ext(filepath.Base(mediaPath))
+	if !motionExtensionsPairStill[strings.ToLower(ext)] {
+		return false
+	}
+	owner := sidecarJSONOwnerBaseName(filepath.Base(resolvedJsonPath))
+	if owner == "" {
+		return false
+	}
+	return !strings.EqualFold(filepath.Base(mediaPath), owner)
+}
+
+// stillSharesMetadataWithMotion reports whether this file type can be the still half of a Google Takeout Live Photo pair.
+func stillSharesMetadataWithMotion(base string) bool {
+	switch strings.ToLower(filepath.Ext(base)) {
+	case ".jpg", ".jpeg", ".heic":
+		return true
+	default:
+		return false
+	}
+}
+
+// pairedMotionSiblingInDir is true when a motion file with the same basename stem exists (e.g. IMG_5175.JPG + IMG_5175.MP4).
+func pairedMotionSiblingInDir(dir, mediaPath string) bool {
+	if !stillSharesMetadataWithMotion(filepath.Base(mediaPath)) {
+		return false
+	}
+	base := filepath.Base(mediaPath)
+	ext := filepath.Ext(base)
+	nameNoExt := strings.TrimSuffix(base, ext)
+	for _, suf := range motionSiblingSuffixes {
+		if statOK(filepath.Join(dir, nameNoExt+suf)) {
+			return true
+		}
+	}
+	return false
+}
+
+// SidecarDeletionPaths returns JSON paths safe to remove after a successful write when the user opts in to deletion.
+// If metadata was borrowed from a paired still image’s sidecar, the resolved JSON path is omitted so the still keeps its companion file.
+// If this still has a paired motion file, nothing is deleted: processing the still first would otherwise remove JSON the motion row still needs in the same run.
+func SidecarDeletionPaths(mediaPath, resolvedJsonPath string) []string {
+	dir := filepath.Dir(mediaPath)
+	if pairedMotionSiblingInDir(dir, mediaPath) {
+		return nil
+	}
+	paths := SidecarCleanupPaths(mediaPath, resolvedJsonPath)
+	if !SidecarBorrowedFromDifferentMedia(mediaPath, resolvedJsonPath) {
+		return paths
+	}
+	target := filepath.Clean(resolvedJsonPath)
+	var out []string
+	for _, p := range paths {
+		if filepath.Clean(p) == target {
+			continue
+		}
+		out = append(out, p)
+	}
+	return out
 }
 
 // editedOriginalStem reports whether nameNoExt ends with "-edited" (case-insensitive) and returns the stem without it.
