@@ -4,6 +4,24 @@ Desktop app for **Google Takeout** exports: it finds JSON sidecars next to your 
 
 You must install [ExifTool](https://exiftool.org/) yourself. The app resolves it from your `PATH` and common install locations (e.g. Homebrew and `/usr/local/bin` on macOS), which helps when the GUI does not see the same `PATH` as your terminal.
 
+## Screenshots
+
+**Welcome** — pick a Takeout folder and confirm ExifTool is available.
+
+![Welcome screen with folder selection and stepper](https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step1-main.png)
+
+**Review** — folder summary and counts; optional deletion of sidecar JSON after a successful run.
+
+![Review step with statistics and Start](https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step2-review.png)
+
+**Update** — progress while metadata is written; pause or stop anytime.
+
+![Processing step with progress bar](https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step3-progress.png)
+
+**Done** — per-run succeeded, skipped, and failed totals.
+
+![Done step with result summary](https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step4-done.png)
+
 ## Download
 
 Prebuilt **macOS (DMG)** and **Windows (.exe)** builds are on [GitHub Releases](https://github.com/MRdevX/takeout-md-fixer/releases). Pushes to `main` trigger a release workflow that bumps the patch version from git tags and publishes artifacts plus a short changelog.
