@@ -1,42 +1,36 @@
-# landing
+# Takeout Metadata Fixer (landing)
 
-This template should help get you started developing with Vue 3 in Vite.
+Static marketing page for [takeout.mrashidi.me](https://takeout.mrashidi.me), built with [Vue 3](https://vuejs.org/) and [Vite](https://vite.dev/). Styling matches the desktop app (see `frontend/public/style.css` tokens).
 
-## Recommended IDE Setup
-
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## Setup
 
 ```sh
 pnpm install
 ```
 
-### Compile and Hot-Reload for Development
+## Develop
 
 ```sh
 pnpm dev
 ```
 
-### Type-Check, Compile and Minify for Production
+## Build
 
 ```sh
 pnpm build
 ```
+
+Output: `landing/dist/`. Upload that folder to your host as static files.
+
+## Deploy (takeout.mrashidi.me)
+
+1. Build with `pnpm build`.
+2. Point DNS for `takeout.mrashidi.me` to your hosting provider.
+3. Serve `dist/` as the site root (no server-side routing needed; single-page).
+
+Examples: nginx `root` to `dist`, Cloudflare Pages, GitHub Pages with a custom domain, or any static host.
+
+## Links
+
+- Downloads: [GitHub Releases](https://github.com/MRdevX/takeout-md-fixer/releases)
+- Source: [github.com/MRdevX/takeout-md-fixer](https://github.com/MRdevX/takeout-md-fixer)
