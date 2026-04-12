@@ -107,7 +107,7 @@ html.platform-macos .app-topbar {
     pointer-events: none;
 }
 
-.app-topbar .about-link {
+.app-topbar .chrome-btn {
     pointer-events: auto;
 }
 
@@ -118,31 +118,61 @@ html.platform-macos .app-topbar {
     -webkit-user-select: none;
 }
 
-.about-link {
+/* Secondary actions (Back, About): same surface language as stat cards / glossary — not primary pill CTA */
+.chrome-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    min-height: 36px;
+    padding: var(--space-2) var(--space-4);
+    margin: 0;
     background: var(--bg-elevated);
     border: 1px solid var(--border);
-    color: var(--text-muted);
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    font-family: var(--font);
-    padding: 8px 14px;
-    border-radius: 999px;
+    border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
-    transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    line-height: var(--line-height-tight);
+    cursor: pointer;
+    transition:
+        color 0.15s,
+        background 0.15s,
+        border-color 0.15s,
+        box-shadow 0.15s,
+        transform 0.1s;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
-.toolbar-btn {
-    min-height: 34px;
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    font-size: var(--font-size-xs);
-}
-
-.about-link:hover {
+.chrome-btn:hover {
     color: var(--accent);
+    background: var(--accent-soft);
     border-color: var(--accent-ring);
     box-shadow: var(--shadow-md);
+}
+
+.chrome-btn:active {
+    transform: scale(0.98);
+}
+
+.chrome-btn--danger {
+    color: var(--red);
+}
+
+.chrome-btn--danger:hover {
+    color: #b91c1c;
+    background: var(--red-soft);
+    border-color: rgba(220, 38, 38, 0.25);
+    box-shadow: var(--shadow-md);
+}
+
+.chrome-btn-icon {
+    font-weight: 700;
+    opacity: 0.65;
+    margin-inline-end: 1px;
 }
 
 .exiftool-banner {
@@ -523,22 +553,13 @@ h2 {
     color: var(--accent);
 }
 
-#btn-fix-stop {
-    color: var(--red);
-}
-
-#btn-fix-stop:hover {
-    color: #b91c1c;
-    background: var(--red-soft);
-}
-
 .btn-sm {
     font-size: var(--font-size-sm);
     padding: 8px 16px;
 }
 
 .btn:focus-visible,
-.about-link:focus-visible,
+.chrome-btn:focus-visible,
 .modal-close:focus-visible,
 .checkbox-row input:focus-visible {
     outline: 2px solid var(--accent-ring);
@@ -748,10 +769,6 @@ h2 {
 
 .processing-header {
     width: 100%;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: start;
-    gap: var(--space-3) var(--space-4);
 }
 
 .processing-header h2 {
@@ -762,8 +779,10 @@ h2 {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-end;
-    gap: var(--space-2);
+    justify-content: center;
+    gap: var(--space-3);
+    width: 100%;
+    margin-top: var(--space-3);
 }
 
 .processing-controls-group {
@@ -772,11 +791,7 @@ h2 {
     gap: var(--space-2);
 }
 
-.processing-stop {
-    margin-left: var(--space-2);
-}
-
-.processing-controls .btn.hidden {
+.processing-controls .chrome-btn.hidden {
     display: none;
 }
 
@@ -1075,18 +1090,6 @@ details[open] > summary .disclosure-chevron::before {
     max-width: 40rem;
 }
 
-.processing-header-titles {
-    grid-column: 1;
-    grid-row: 1;
-    min-width: 0;
-}
-
-.processing-header .processing-controls {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: start;
-}
-
 .processing-subtitle {
     font-size: var(--font-size-sm);
     color: var(--text-muted);
@@ -1172,23 +1175,18 @@ details[open] > summary .disclosure-chevron::before {
         grid-row: 3;
     }
 
-    .processing-header {
-        grid-template-columns: 1fr;
+    .processing-controls {
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    .processing-header-titles {
-        grid-column: 1;
-        grid-row: 1;
+    .processing-controls-group {
+        justify-content: center;
     }
 
-    .processing-header .processing-controls {
-        grid-column: 1;
-        grid-row: 2;
-        justify-content: flex-start;
-    }
-
-    .processing-stop {
-        margin-left: 0;
+    .processing-controls .chrome-btn {
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .stat-card {

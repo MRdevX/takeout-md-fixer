@@ -9,8 +9,9 @@
   <body>
     <div id="app">
       <header class="app-topbar">
-        <button type="button" id="btn-back" class="about-link toolbar-btn" hidden aria-hidden="true" aria-label="Back">
-          ← Back
+        <button type="button" id="btn-back" class="chrome-btn chrome-btn--back" hidden aria-hidden="true" aria-label="Back">
+          <span class="chrome-btn-icon" aria-hidden="true">←</span>
+          <span>Back</span>
         </button>
         <span class="app-topbar-fill" aria-hidden="true"></span>
       </header>
@@ -61,7 +62,7 @@
             first.
           </p>
           <button id="btn-select" class="btn btn-primary">Select folder</button>
-          <button type="button" id="btn-about" class="about-link toolbar-btn hero-about">About</button>
+          <button type="button" id="btn-about" class="chrome-btn hero-about">About</button>
         </div>
       </div>
 
@@ -136,31 +137,11 @@
       <div id="view-processing" class="view view-processing">
         <div class="processing-content content-column">
           <div class="processing-header">
-            <div class="processing-header-titles">
-              <h2 id="processing-title">Processing…</h2>
-              <p id="processing-subtitle" class="processing-subtitle">
-                Copying date and location into your files. This may take a few minutes. You can pause or stop; progress is
-                saved.
-              </p>
-            </div>
-            <div class="processing-controls" role="toolbar" aria-label="Progress controls">
-              <div class="processing-controls-group">
-                <button type="button" id="btn-fix-pause" class="btn btn-ghost btn-sm" aria-describedby="hint-pause">
-                  Pause
-                </button>
-                <button type="button" id="btn-fix-resume" class="btn btn-ghost btn-sm hidden" aria-describedby="hint-resume">
-                  Resume
-                </button>
-              </div>
-              <button
-                type="button"
-                id="btn-fix-stop"
-                class="btn btn-ghost btn-sm processing-stop"
-                aria-describedby="hint-stop"
-              >
-                Stop
-              </button>
-            </div>
+            <h2 id="processing-title">Processing…</h2>
+            <p id="processing-subtitle" class="processing-subtitle">
+              Copying date and location into your files. This may take a few minutes. You can pause or stop; progress is
+              saved.
+            </p>
           </div>
           <p id="hint-pause" class="visually-hidden">Pauses after the current file. Click Resume to continue.</p>
           <p id="hint-resume" class="visually-hidden">Continues from where you paused.</p>
@@ -178,6 +159,17 @@
               aria-valuenow="0"
               aria-valuetext="0 percent"
             ></div>
+          </div>
+          <div class="processing-controls" role="toolbar" aria-label="Progress controls">
+            <div class="processing-controls-group">
+              <button type="button" id="btn-fix-pause" class="chrome-btn" aria-describedby="hint-pause">Pause</button>
+              <button type="button" id="btn-fix-resume" class="chrome-btn hidden" aria-describedby="hint-resume">
+                Resume
+              </button>
+            </div>
+            <button type="button" id="btn-fix-stop" class="chrome-btn chrome-btn--danger" aria-describedby="hint-stop">
+              Stop
+            </button>
           </div>
           <div class="progress-info">
             <span id="progress-text" aria-live="polite">0 / 0 (0%)</span>
