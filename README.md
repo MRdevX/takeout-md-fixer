@@ -10,7 +10,7 @@ Prebuilt **macOS (DMG)** and **Windows (.exe)** builds are on [GitHub Releases](
 
 ## Resuming
 
-If you stop early or quit, progress is saved in a hidden file **`.takeout-md-fixer-checkpoint.json`** in the folder you selected. Next time, enable **Continue where you left off** to skip files already processed. Delete that file if you want a full pass from scratch on the same folder.
+If you stop early or quit, progress is saved in a hidden file **`.takeout-md-fixer-checkpoint.json`** in the folder you selected. The next time you open that folder in the app, it **resumes automatically** and skips files already processed. Delete that file if you want a full pass from scratch on the same folder.
 
 ## Develop
 

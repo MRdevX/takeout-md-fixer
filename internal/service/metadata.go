@@ -59,7 +59,7 @@ func (s *MetadataService) ScanFolder(folderPath string) (*takeout.ScanResult, er
 	return takeout.ScanFolder(folderPath)
 }
 
-// FixCheckpointAvailable reports whether a saved checkpoint exists for this folder (resume possible).
+// FixCheckpointAvailable reports whether a saved checkpoint exists for this folder (UI uses this for auto-resume and a short notice).
 func (s *MetadataService) FixCheckpointAvailable(folderPath string) (bool, error) {
 	return hasCheckpoint(folderPath)
 }
@@ -147,7 +147,7 @@ func (s *MetadataService) shouldAbort() bool {
 // FixMetadata writes EXIF from sidecar JSON and optionally removes sidecar files.
 // Sidecar deletion runs once at the end: each JSON is removed only after every media file
 // that referenced it has been written (including items skipped via resume checkpoint).
-// If resume is true, completed paths from .takeout-md-fixer-checkpoint.json are skipped.
+// If resume is true, completed paths from .takeout-md-fixer-checkpoint.json are skipped (the UI sets this when that file exists).
 //
 // Work runs in a background goroutine so the Wails runtime can process other calls and events.
 // The UI should listen for "fix-progress" and a final "fix-complete" event (see FixComplete).

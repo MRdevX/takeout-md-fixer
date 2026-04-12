@@ -24,7 +24,6 @@ const progressFilePathEl = document.getElementById("progress-file-path");
 const btnFixPause = document.getElementById("btn-fix-pause");
 const btnFixResume = document.getElementById("btn-fix-resume");
 const btnFixStop = document.getElementById("btn-fix-stop");
-const chkResumeFix = document.getElementById("chk-resume-fix");
 const checkpointHint = document.getElementById("checkpoint-hint");
 const scanEmptyMessage = document.getElementById("scan-empty-message");
 
@@ -176,30 +175,23 @@ function formatErrorMessage(err) {
 }
 
 async function updateCheckpointHint() {
-  if (!checkpointHint || !chkResumeFix) return;
+  if (!checkpointHint) return;
   if (!currentPath) {
     checkpointHint.classList.add("hidden");
-    chkResumeFix.checked = false;
-    chkResumeFix.disabled = true;
     return;
   }
   try {
     const ok = await MetadataService.FixCheckpointAvailable(currentPath);
     if (ok) {
       checkpointHint.textContent =
-        "Last run did not finish. Turn on “Continue from last time” below to skip files already updated. To start from scratch, delete .takeout-md-fixer-checkpoint.json in this folder.";
+        "Continuing from your last session — files already updated will be skipped automatically.";
       checkpointHint.classList.remove("hidden");
-      chkResumeFix.disabled = false;
     } else {
       checkpointHint.classList.add("hidden");
-      chkResumeFix.checked = false;
-      chkResumeFix.disabled = true;
     }
   } catch (e) {
     console.error("FixCheckpointAvailable error:", e);
     checkpointHint.classList.add("hidden");
-    chkResumeFix.checked = false;
-    chkResumeFix.disabled = true;
   }
 }
 
@@ -396,7 +388,12 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
 
   try {
     const deleteJson = document.getElementById("chk-delete-json").checked;
-    const resume = chkResumeFix?.checked === true;
+    let resume = false;
+    try {
+      resume = await MetadataService.FixCheckpointAvailable(currentPath);
+    } catch (e) {
+      console.error("FixCheckpointAvailable error:", e);
+    }
     await MetadataService.FixMetadata(currentPath, deleteJson, resume);
   } catch (err) {
     offComplete();
@@ -468,7 +465,7 @@ function renderDoneResults(result) {
   const doneSummary = document.getElementById("done-summary");
   if (doneSummary) {
     doneSummary.textContent = result.aborted
-      ? "Stopped before all files were processed. Progress is saved. Click Start over, select the same folder, then turn on Continue from last time to finish."
+      ? "Stopped before all files were processed. Progress is saved. Click Start over, select the same folder, and press Start to finish."
       : "Results for this run.";
   }
 
