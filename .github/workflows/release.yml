@@ -1,5 +1,5 @@
 # On each push to main (e.g. after merging a PR), bump patch version from the latest v* tag,
-# build macOS (.app + DMG) and Windows (.exe), and publish a GitHub Release with a changelog
+# build macOS (.app + DMG) and Windows (amd64 + arm64 .exe), and publish a GitHub Release with a changelog
 # from commit subjects since that tag.
 
 name: Release
@@ -133,6 +133,10 @@ jobs:
   build-windows:
     needs: version
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
     defaults:
       run:
         shell: bash
@@ -180,19 +184,21 @@ jobs:
           npm run build
 
       - name: Generate syso and build Windows exe
+        env:
+          WIN_ARCH: ${{ matrix.arch }}
         run: |
           set -euo pipefail
           cd build
-          wails3 generate syso -arch amd64 -icon windows/icon.ico -manifest windows/wails.exe.manifest -info windows/info.json -out ../wails_windows_amd64.syso
+          wails3 generate syso -arch "${WIN_ARCH}" -icon windows/icon.ico -manifest windows/wails.exe.manifest -info windows/info.json -out "../wails_windows_${WIN_ARCH}.syso"
           cd ..
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -tags production -trimpath -buildvcs=false -ldflags="-w -s -H windowsgui" -o bin/takeout-md-fixer.exe .
-          rm -f wails_windows_amd64.syso
+          GOOS=windows GOARCH="${WIN_ARCH}" CGO_ENABLED=0 go build -tags production -trimpath -buildvcs=false -ldflags="-w -s -H windowsgui" -o "bin/takeout-md-fixer-windows-${WIN_ARCH}.exe" .
+          rm -f "wails_windows_${WIN_ARCH}.syso"
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v7
         with:
           name: windows
-          path: bin/takeout-md-fixer.exe
+          path: bin/takeout-md-fixer-windows-${{ matrix.arch }}.exe
 
   publish:
     needs: [version, build-macos, build-windows]
@@ -224,9 +230,10 @@ jobs:
           set -euo pipefail
           mkdir -p upload
           cp "dist/macos/takeout-md-fixer.dmg" "upload/"
-          cp "dist/windows/takeout-md-fixer.exe" "upload/"
+          cp dist/windows/takeout-md-fixer-windows-*.exe upload/
           gh release create "${{ needs.version.outputs.tag }}" \
             --title "Takeout Metadata Fixer ${{ needs.version.outputs.version }}" \
             --notes-file "notes/changelog.md" \
             upload/takeout-md-fixer.dmg \
-            upload/takeout-md-fixer.exe
+            upload/takeout-md-fixer-windows-amd64.exe \
+            upload/takeout-md-fixer-windows-arm64.exe

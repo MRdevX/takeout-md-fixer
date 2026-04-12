@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build release artifacts locally (macOS: .app + .dmg; Windows amd64: .exe cross-compile).
+# Build release artifacts locally (macOS: .app + .dmg; Windows amd64 + arm64: .exe cross-compile).
 # Prerequisites: Go, Node, Wails v3 CLI (`wails3`), macOS for DMG (hdiutil).
 # Usage:
 #   ./scripts/build-release.sh              # uses version from build/config.yml
@@ -44,13 +44,15 @@ else
 	echo "Skipping DMG (macOS only)."
 fi
 
-echo "Cross-compiling Windows amd64 exe..."
-(
-	cd build
-	wails3 generate syso -arch amd64 -icon windows/icon.ico -manifest windows/wails.exe.manifest -info windows/info.json -out ../wails_windows_amd64.syso
-)
-GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -tags production -trimpath -buildvcs=false -ldflags="-w -s -H windowsgui" -o bin/takeout-md-fixer.exe .
-rm -f wails_windows_amd64.syso
+echo "Cross-compiling Windows amd64 and arm64 exes..."
+for WIN_ARCH in amd64 arm64; do
+	(
+		cd build
+		wails3 generate syso -arch "${WIN_ARCH}" -icon windows/icon.ico -manifest windows/wails.exe.manifest -info windows/info.json -out "../wails_windows_${WIN_ARCH}.syso"
+	)
+	GOOS=windows GOARCH="${WIN_ARCH}" CGO_ENABLED=0 go build -tags production -trimpath -buildvcs=false -ldflags="-w -s -H windowsgui" -o "bin/takeout-md-fixer-windows-${WIN_ARCH}.exe" .
+	rm -f "wails_windows_${WIN_ARCH}.syso"
+done
 
 echo "Done."
-ls -la bin/takeout-md-fixer.app bin/takeout-md-fixer.dmg bin/takeout-md-fixer.exe 2>/dev/null || ls -la bin/
+ls -la bin/takeout-md-fixer.app bin/takeout-md-fixer.dmg bin/takeout-md-fixer-windows-*.exe 2>/dev/null || ls -la bin/
