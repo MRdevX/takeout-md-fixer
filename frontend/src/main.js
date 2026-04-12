@@ -26,6 +26,9 @@ const btnFixResume = document.getElementById("btn-fix-resume");
 const btnFixStop = document.getElementById("btn-fix-stop");
 const chkResumeFix = document.getElementById("chk-resume-fix");
 const checkpointHint = document.getElementById("checkpoint-hint");
+const fileListDetails = document.getElementById("file-list-details");
+const fileListSummaryText = document.getElementById("file-list-summary-text");
+const scanEmptyMessage = document.getElementById("scan-empty-message");
 
 const PROCESSING_SUBTITLE_DEFAULT =
     "Copying date and location into your files. This may take a few minutes. You can pause or stop; progress is saved.";
@@ -339,6 +342,16 @@ document.getElementById("btn-select").addEventListener("click", async () => {
         showView("scan");
         views.scan?.setAttribute("aria-busy", "true");
         document.getElementById("btn-fix").disabled = true;
+        if (fileListDetails) {
+            fileListDetails.classList.remove("hidden");
+            fileListDetails.removeAttribute("open");
+        }
+        if (fileListSummaryText) {
+            fileListSummaryText.textContent = "Scanning folder…";
+        }
+        if (scanEmptyMessage) {
+            scanEmptyMessage.classList.add("hidden");
+        }
         renderFileListMessage("Scanning folder…", true);
         const scanPathEl = document.getElementById("scan-path");
         if (scanPathEl) {
@@ -467,10 +480,31 @@ function renderScanResults(data) {
     }
 
     const tbody = document.getElementById("file-list-body");
+    if (scanEmptyMessage) {
+        scanEmptyMessage.classList.add("hidden");
+        scanEmptyMessage.textContent = "";
+    }
+
     if (!data.files || data.files.length === 0) {
+        if (fileListDetails) {
+            fileListDetails.classList.add("hidden");
+        }
+        if (scanEmptyMessage) {
+            scanEmptyMessage.textContent = "No supported photos or videos found in this folder.";
+            scanEmptyMessage.classList.remove("hidden");
+        }
         renderFileListMessage("No photos or videos found in this folder.");
         document.getElementById("btn-fix").disabled = true;
         return;
+    }
+
+    if (fileListDetails) {
+        fileListDetails.classList.remove("hidden");
+        fileListDetails.removeAttribute("open");
+    }
+    if (fileListSummaryText) {
+        const n = data.files.length;
+        fileListSummaryText.textContent = n === 1 ? "Show 1 file" : `Show all ${n} files`;
     }
 
     tbody.innerHTML = data.files

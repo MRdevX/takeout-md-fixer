@@ -54,11 +54,11 @@
         <div class="scan-layout content-column">
             <div class="scan-header">
                 <div class="scan-header-copy">
-                    <h2>Review your library</h2>
-                    <p class="scan-subtitle">We found the items below. When you’re ready, we’ll copy each file’s date and location from Google’s companion file into the photo or video itself.</p>
+                    <h2>Review</h2>
+                    <p class="scan-subtitle">Summary of this folder. Start when you’re ready—we’ll copy date and location from Google’s companion files into your photos and videos.</p>
                 </div>
                 <button id="btn-fix" class="btn btn-primary" aria-describedby="btn-fix-hint">Start</button>
-                <p id="btn-fix-hint" class="btn-fix-hint">Updates files that have Google’s info file. May take a while for large folders.</p>
+                <p id="btn-fix-hint" class="btn-fix-hint">Only files with a companion JSON are updated. Large folders can take a while.</p>
             </div>
             <div id="scan-path" class="folder-path" title=""></div>
             <details class="scan-glossary">
@@ -90,12 +90,13 @@
                 </div>
             </div>
             <p id="checkpoint-hint" class="checkpoint-hint hidden" role="status"></p>
+            <p id="scan-empty-message" class="scan-empty-message hidden" role="status"></p>
             <div class="scan-options">
                 <label class="checkbox-row">
-                    <input type="checkbox" id="chk-delete-json" aria-describedby="chk-delete-json-hint"/>
-                    <span>After a successful update, remove Google’s small companion files</span>
+                    <input type="checkbox" id="chk-delete-json" checked aria-describedby="chk-delete-json-hint"/>
+                    <span>After a successful update, remove Google’s companion JSON files</span>
                 </label>
-                <p id="chk-delete-json-hint" class="checkbox-hint">Optional. Your photos and videos will already hold date and place; this only deletes the separate Takeout files.</p>
+                <p id="chk-delete-json-hint" class="checkbox-hint">Dates and locations stay in your media; this only removes the extra Takeout sidecar files. Turn off to keep them.</p>
                 <label class="checkbox-row">
                     <input type="checkbox" id="chk-resume-fix" disabled aria-describedby="chk-resume-hint"/>
                     <span>Continue from last time</span>
@@ -103,18 +104,24 @@
                 <p id="chk-resume-hint" class="checkbox-hint">Skips files already updated (uses a small saved file in this folder).</p>
             </div>
         </div>
-        <div class="file-list-container">
-            <table class="file-list">
-                <thead>
-                    <tr>
-                        <th scope="col" title="File name">File</th>
-                        <th scope="col" title="Whether Google Takeout left a companion file with date and location">Google info</th>
-                        <th scope="col" title="Whether this item is ready to be updated">Update status</th>
-                    </tr>
-                </thead>
-                <tbody id="file-list-body"></tbody>
-            </table>
-        </div>
+        <details id="file-list-details" class="file-list-details content-column">
+            <summary class="file-list-details-summary" id="file-list-summary">
+                <span class="file-list-details-chevron" aria-hidden="true"></span>
+                <span id="file-list-summary-text">Show file list</span>
+            </summary>
+            <div class="file-list-container">
+                <table class="file-list">
+                    <thead>
+                        <tr>
+                            <th scope="col" title="File name">File</th>
+                            <th scope="col" title="Whether Google Takeout left a companion file with date and location">Google info</th>
+                            <th scope="col" title="Whether this item is ready to be updated">Update status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="file-list-body"></tbody>
+                </table>
+            </div>
+        </details>
     </div>
 
     <div id="view-processing" class="view view-processing">
