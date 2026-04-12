@@ -26,8 +26,6 @@ const btnFixResume = document.getElementById("btn-fix-resume");
 const btnFixStop = document.getElementById("btn-fix-stop");
 const chkResumeFix = document.getElementById("chk-resume-fix");
 const checkpointHint = document.getElementById("checkpoint-hint");
-const fileListDetails = document.getElementById("file-list-details");
-const fileListSummaryText = document.getElementById("file-list-summary-text");
 const scanEmptyMessage = document.getElementById("scan-empty-message");
 
 const PROCESSING_SUBTITLE_DEFAULT =
@@ -140,44 +138,6 @@ function setProgressUi(current, total, file = "") {
             progressFilePathEl.textContent = base === file ? "" : file;
         }
     }
-}
-
-/** Maps backend file status to short, friendly labels (badges). */
-const FILE_STATUS_LABELS = {
-    pending: "Waiting",
-    success: "OK",
-    error: "Failed",
-    skipped: "Skipped",
-};
-
-/** @param {string} status */
-function fileStatusLabel(status) {
-    return FILE_STATUS_LABELS[status] ?? status;
-}
-
-/** @param {string} status */
-function fileStatusTitle(status) {
-    switch (status) {
-        case "pending":
-            return "Waiting to update";
-        case "success":
-            return "Updated successfully";
-        case "error":
-            return "Update failed";
-        case "skipped":
-            return "Left unchanged (for example, already done or no companion file)";
-        default:
-            return "";
-    }
-}
-
-function renderFileListMessage(message, loading = false) {
-    const tbody = document.getElementById("file-list-body");
-    if (!tbody) return;
-    const rowClass = loading ? "file-list-message file-list-message--loading" : "file-list-message";
-    const messageClass = loading ? "file-list-message-text file-list-message-text--loading" : "file-list-message-text";
-    const spinner = loading ? '<span class="inline-spinner" aria-hidden="true"></span>' : "";
-    tbody.innerHTML = `<tr><td colspan="3" class="${rowClass}"><span class="${messageClass}">${spinner}${message}</span></td></tr>`;
 }
 
 let currentPath = "";
@@ -355,17 +315,9 @@ document.getElementById("btn-select").addEventListener("click", async () => {
         showView("scan");
         views.scan?.setAttribute("aria-busy", "true");
         document.getElementById("btn-fix").disabled = true;
-        if (fileListDetails) {
-            fileListDetails.classList.remove("hidden");
-            fileListDetails.removeAttribute("open");
-        }
-        if (fileListSummaryText) {
-            fileListSummaryText.textContent = "Scanning folder…";
-        }
         if (scanEmptyMessage) {
             scanEmptyMessage.classList.add("hidden");
         }
-        renderFileListMessage("Scanning folder…", true);
         const scanPathEl = document.getElementById("scan-path");
         if (scanPathEl) {
             scanPathEl.textContent = `Folder: ${basename(path)}`;
@@ -492,48 +444,19 @@ function renderScanResults(data) {
         scanPathEl.setAttribute("title", data.folderPath);
     }
 
-    const tbody = document.getElementById("file-list-body");
     if (scanEmptyMessage) {
         scanEmptyMessage.classList.add("hidden");
         scanEmptyMessage.textContent = "";
     }
 
     if (!data.files || data.files.length === 0) {
-        if (fileListDetails) {
-            fileListDetails.classList.add("hidden");
-        }
         if (scanEmptyMessage) {
             scanEmptyMessage.textContent = "No supported photos or videos found in this folder.";
             scanEmptyMessage.classList.remove("hidden");
         }
-        renderFileListMessage("No photos or videos found in this folder.");
         document.getElementById("btn-fix").disabled = true;
         return;
     }
-
-    if (fileListDetails) {
-        fileListDetails.classList.remove("hidden");
-        fileListDetails.removeAttribute("open");
-    }
-    if (fileListSummaryText) {
-        const n = data.files.length;
-        fileListSummaryText.textContent = n === 1 ? "Show 1 file" : `Show all ${n} files`;
-    }
-
-    tbody.innerHTML = data.files
-        .map((f) => {
-            const stLabel = escapeHtml(fileStatusLabel(f.status));
-            const stTitle = escapeHtml(fileStatusTitle(f.status));
-            const jsonCell = f.hasJson
-                ? '<span class="badge badge-yes" title="Google Takeout left a companion file with date and location">Yes</span>'
-                : '<span class="badge badge-no" title="No companion file — there is nothing to copy into this item">No</span>';
-            return `<tr>
-            <td title="${escapeHtml(f.path)}">${escapeHtml(f.name)}</td>
-            <td>${jsonCell}</td>
-            <td><span class="badge badge-${escapeHtml(f.status)}" title="${stTitle}">${stLabel}</span></td>
-        </tr>`;
-        })
-        .join("");
 
     document.getElementById("btn-fix").disabled = data.withJson === 0 || !exiftoolOk;
 }
@@ -583,12 +506,6 @@ function renderDoneResults(result) {
         extra.textContent = "";
         extra.classList.add("hidden");
     }
-}
-
-function escapeHtml(str) {
-    const div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
 }
 
 refreshExiftoolStatus();
