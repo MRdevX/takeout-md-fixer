@@ -20,7 +20,16 @@ You need Go (see [`go.mod`](go.mod)), Node.js, the [Wails v3 CLI](https://v3.wai
 wails3 dev -config ./build/config.yml
 ```
 
-[`main.go`](main.go) embeds [`frontend/dist`](frontend/dist), which is gitignored. Before `go build`, `go vet`, or `go test` at the repo root, build the frontend (`npm ci` and `npm run build` in `frontend/`). CI does the same.
+[`main.go`](main.go) embeds [`frontend/dist`](frontend/dist), which is gitignored. Before `go build`, `go vet`, or `go test` at the repo root, build the frontend (`npm ci` and `npm run build` in `frontend/`). CI does the same. From the repo root you can run **`task ci:local`** to build the frontend (via Wails bindings + Vite), then `gofmt`, `go vet`, and `go test`.
+
+### Go packages (where to change what)
+
+| Area | Package | Notes |
+|------|---------|--------|
+| Wails API, fix job, pause/resume, checkpoints | [`internal/service`](internal/service) | Emits app events `fix-progress` and `fix-complete`; checkpoint file `.takeout-md-fixer-checkpoint.json` lives in the chosen Takeout folder. |
+| Scanning, sidecar resolution, Takeout JSON types | [`internal/takeout`](internal/takeout) | New filename patterns or JSON fields usually start here. |
+| ExifTool invocation and tag mapping | [`internal/exif`](internal/exif) | New EXIF / video date tags. |
+| Path comparison keys (scan vs checkpoint) | [`internal/pathkey`](internal/pathkey) | Single normalization used across scan and checkpoint maps. |
 
 If you change exported Go methods or JSON types used from the UI, regenerate [`frontend/bindings/`](frontend/bindings/) with the Wails version in `go.mod`, then rebuild the frontend:
 

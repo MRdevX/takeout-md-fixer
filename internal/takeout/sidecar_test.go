@@ -263,24 +263,6 @@ func TestSidecarPath_motionOwnSidecarBeforePairedStill(t *testing.T) {
 	}
 }
 
-func TestSidecarBorrowedFromDifferentMedia_livePhoto(t *testing.T) {
-	t.Parallel()
-	dir := t.TempDir()
-	mp4 := filepath.Join(dir, "IMG_5175.MP4")
-	sup := filepath.Join(dir, "IMG_5175.JPG.supplemental-metadata.json")
-	if !SidecarBorrowedFromDifferentMedia(mp4, sup) {
-		t.Fatal("expected borrowed for MP4 using JPG sidecar")
-	}
-	ownSup := mp4 + ".supplemental-metadata.json"
-	if SidecarBorrowedFromDifferentMedia(mp4, ownSup) {
-		t.Fatal("same-basename sidecar is not borrowed")
-	}
-	jpg := filepath.Join(dir, "IMG_5175.JPG")
-	if SidecarBorrowedFromDifferentMedia(jpg, sup) {
-		t.Fatal("still file using its own sidecar is not borrowed")
-	}
-}
-
 func TestSidecarCleanupRepresentative_prefersJsonOwner(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
@@ -295,22 +277,23 @@ func TestSidecarCleanupRepresentative_prefersJsonOwner(t *testing.T) {
 	}
 }
 
-func TestSidecarDeletionPaths_omitsBorrowedResolvedJson(t *testing.T) {
+// Batch sidecar deletion uses SidecarCleanupRepresentative so cleanup runs from the JSON owner
+// (e.g. JPG); paths must still include the shared supplemental file when resolved from the motion path.
+func TestSidecarCleanupPaths_motionFileIncludesBorrowedResolvedSidecar(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 	mp4 := filepath.Join(dir, "IMG_5175.MP4")
 	sup := filepath.Join(dir, "IMG_5175.JPG.supplemental-metadata.json")
-	if err := os.WriteFile(mp4, []byte("m"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(sup, []byte("{}"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	paths := SidecarDeletionPaths(mp4, sup)
+	paths := SidecarCleanupPaths(mp4, sup)
+	var hasSup bool
 	for _, p := range paths {
 		if filepath.Clean(p) == filepath.Clean(sup) {
-			t.Fatalf("borrowed sidecar should not be deleted: still in %#v", paths)
+			hasSup = true
+			break
 		}
+	}
+	if !hasSup {
+		t.Fatalf("expected resolved supplemental in cleanup paths, got %#v", paths)
 	}
 }
 

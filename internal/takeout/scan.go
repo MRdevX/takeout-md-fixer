@@ -5,6 +5,8 @@ import (
 	"io/fs"
 	"path/filepath"
 	"strings"
+
+	"takeout-md-fixer/internal/pathkey"
 )
 
 // ScanFolder walks root recursively and lists media files with optional JSON sidecars,
@@ -37,7 +39,7 @@ func ScanFolder(root string) (*ScanResult, error) {
 		}
 
 		ext := strings.ToLower(filepath.Ext(path))
-		if MediaExtensions[ext] {
+		if isMediaExt(ext) {
 			mf := MediaFile{
 				Path:   path,
 				Name:   info.Name(),
@@ -48,7 +50,8 @@ func ScanFolder(root string) (*ScanResult, error) {
 				mf.JsonPath = jsonPath
 				mf.HasJson = true
 				result.WithJson++
-				if k := normalizePathKey(jsonPath); k != "" {
+				k := pathkey.Normalize(jsonPath)
+				if k != "" {
 					linkedJSON[k] = struct{}{}
 				}
 			} else {
@@ -74,7 +77,7 @@ func ScanFolder(root string) (*ScanResult, error) {
 		if b == "metadata.json" || b == "print-subscriptions.json" {
 			continue
 		}
-		k := normalizePathKey(path)
+		k := pathkey.Normalize(path)
 		if k == "" {
 			continue
 		}
@@ -114,12 +117,4 @@ func ListAlbumMetadataJSON(root string) ([]string, error) {
 		return nil, err
 	}
 	return paths, nil
-}
-
-func normalizePathKey(p string) string {
-	abs, err := filepath.Abs(p)
-	if err != nil {
-		return ""
-	}
-	return strings.ToLower(filepath.Clean(abs))
 }

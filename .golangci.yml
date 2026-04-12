@@ -6,6 +6,7 @@ linters:
     - errcheck
     - govet
     - ineffassign
+    - misspell
     - staticcheck
     - unused
   exclusions:

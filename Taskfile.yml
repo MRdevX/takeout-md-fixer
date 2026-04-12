@@ -34,6 +34,22 @@ tasks:
     cmds:
       - wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}
 
+  test:go:
+    summary: Run go test ./... (requires frontend/dist for go:embed — run ci:local if this fails)
+    cmds:
+      - go test ./...
+
+  ci:local:
+    summary: Production frontend build, gofmt, vet, and tests (mirrors CI embed + Go steps)
+    cmds:
+      - task: common:build:frontend
+        vars:
+          DEV: "false"
+          BUILD_FLAGS: '-tags production -trimpath -buildvcs=false -ldflags="-w -s"'
+      - test -z "$(gofmt -l .)"
+      - go vet ./...
+      - go test ./...
+
   setup:docker:
     summary: Builds Docker image for cross-compilation (~800MB download)
     cmds:
