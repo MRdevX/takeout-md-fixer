@@ -9,24 +9,42 @@
 <body>
 <div id="app">
     <header class="app-topbar">
-        <button type="button" id="btn-back" class="about-link toolbar-btn" hidden aria-hidden="true">← Back</button>
+        <button type="button" id="btn-back" class="about-link toolbar-btn" hidden aria-hidden="true" aria-label="Back">← Back</button>
         <span class="app-topbar-fill" aria-hidden="true"></span>
     </header>
 
     <div id="exiftool-warning" class="exiftool-banner hidden" role="alert">
         <p class="exiftool-banner-msg"></p>
-        <p class="exiftool-banner-hint">Install ExifTool from <a href="#" id="exiftool-doc-link" class="inline-link">exiftool.org</a>, put it on your PATH, then restart this app (or click Check again after installing).</p>
-        <button type="button" id="btn-exiftool-recheck" class="btn btn-ghost btn-sm">Check again</button>
+        <p class="exiftool-banner-hint">This app needs <strong>ExifTool</strong> to update your files. Install it from <a href="#" id="exiftool-doc-link" class="inline-link">exiftool.org</a>, then restart the app. You can also click <strong>Try again</strong> after installing.</p>
+        <button type="button" id="btn-exiftool-recheck" class="btn btn-ghost btn-sm">Try again</button>
     </div>
 
     <div id="scan-error-banner" class="exiftool-banner hidden" role="alert">
         <p class="exiftool-banner-msg" id="scan-error-msg"></p>
     </div>
 
+    <nav id="app-stepper" class="stepper" aria-label="Steps">
+        <ol class="stepper-list">
+            <li class="stepper-item" id="stepper-step-welcome">
+                <span class="stepper-num" aria-hidden="true">1</span>
+                <span class="stepper-text">Folder</span>
+            </li>
+            <li class="stepper-item" id="stepper-step-scan">
+                <span class="stepper-num" aria-hidden="true">2</span>
+                <span class="stepper-text">Review</span>
+            </li>
+            <li class="stepper-item" id="stepper-step-processing">
+                <span class="stepper-num" aria-hidden="true">3</span>
+                <span class="stepper-text">Update</span>
+            </li>
+        </ol>
+    </nav>
+
     <div id="view-welcome" class="view active">
         <div class="hero content-column">
             <h1>Takeout Metadata Fixer</h1>
-            <p class="subtitle">Copies date and location from Takeout JSON sidecars into your photos and videos. Requires ExifTool.</p>
+            <p class="subtitle">Put the correct dates and places <em>inside</em> your Google Takeout photos and videos so iCloud, a NAS, or other apps show them properly. You’ll need a small helper app called ExifTool (see the note at the top if it’s missing).</p>
+            <p class="subtitle-trust">This app <strong>writes into your media files</strong>. If you’re unsure, copy your Takeout folder somewhere safe first.</p>
             <button id="btn-select" class="btn btn-primary">Select folder</button>
             <button type="button" id="btn-about" class="about-link toolbar-btn hero-about">About</button>
         </div>
@@ -36,49 +54,62 @@
         <div class="scan-layout content-column">
             <div class="scan-header">
                 <div class="scan-header-copy">
-                    <h2>Scan results</h2>
-                    <p class="scan-subtitle">Review files, then run the fix.</p>
+                    <h2>Review your library</h2>
+                    <p class="scan-subtitle">We found the items below. When you’re ready, we’ll copy each file’s date and location from Google’s companion file into the photo or video itself.</p>
                 </div>
-                <button id="btn-fix" class="btn btn-primary">Fix metadata</button>
+                <button id="btn-fix" class="btn btn-primary" aria-describedby="btn-fix-hint">Start</button>
+                <p id="btn-fix-hint" class="btn-fix-hint">Updates files that have Google’s info file. May take a while for large folders.</p>
             </div>
-            <div id="scan-path" class="folder-path"></div>
-            <div class="stats-row">
-                <div class="stat-card">
+            <div id="scan-path" class="folder-path" title=""></div>
+            <details class="scan-glossary">
+                <summary class="scan-glossary-summary">What do these numbers mean?</summary>
+                <ul class="scan-glossary-list">
+                    <li><strong>Photos &amp; videos</strong> — All pictures and videos we found in the folder you chose.</li>
+                    <li><strong>Have Google’s info</strong> — There’s a small extra file from Takeout with date and place; we can update the media file.</li>
+                    <li><strong>No extra info file</strong> — Nothing to copy from; the file is left as-is.</li>
+                    <li><strong>Extra files not paired</strong> — Takeout-style files that don’t match a photo or video here (often harmless).</li>
+                </ul>
+            </details>
+            <div class="stats-row" aria-describedby="stats-desc">
+                <span id="stats-desc" class="visually-hidden">Summary counts for the selected folder.</span>
+                <div class="stat-card" title="All supported photos and videos in this folder">
                     <span class="stat-value" id="stat-total">0</span>
-                    <span class="stat-label">Total Files</span>
+                    <span class="stat-label">Photos &amp; videos</span>
                 </div>
-                <div class="stat-card stat-ok">
+                <div class="stat-card stat-ok" title="Google Takeout included a companion file with date and location">
                     <span class="stat-value" id="stat-matched">0</span>
-                    <span class="stat-label">With JSON</span>
+                    <span class="stat-label">Have Google’s info</span>
                 </div>
-                <div class="stat-card stat-warn">
+                <div class="stat-card stat-warn" title="No matching Takeout companion file next to this media">
                     <span class="stat-value" id="stat-unmatched">0</span>
-                    <span class="stat-label">No JSON</span>
+                    <span class="stat-label">No extra info file</span>
                 </div>
-                <div class="stat-card stat-orphan">
+                <div class="stat-card stat-orphan" title="JSON files that are not paired with a listed photo or video">
                     <span class="stat-value" id="stat-orphan-json">0</span>
-                    <span class="stat-label">JSON not linked</span>
+                    <span class="stat-label">Extra files not paired</span>
                 </div>
             </div>
             <p id="checkpoint-hint" class="checkpoint-hint hidden" role="status"></p>
             <div class="scan-options">
                 <label class="checkbox-row">
-                    <input type="checkbox" id="chk-delete-json"/>
-                    <span>Delete sidecar JSON after a successful fix</span>
+                    <input type="checkbox" id="chk-delete-json" aria-describedby="chk-delete-json-hint"/>
+                    <span>After a successful update, remove Google’s small companion files</span>
                 </label>
+                <p id="chk-delete-json-hint" class="checkbox-hint">Optional. Your photos and videos will already hold date and place; this only deletes the separate Takeout files.</p>
                 <label class="checkbox-row">
-                    <input type="checkbox" id="chk-resume-fix" disabled/>
-                    <span>Continue where you left off (uses saved progress in this folder)</span>
+                    <input type="checkbox" id="chk-resume-fix" disabled aria-describedby="chk-resume-hint"/>
+                    <span>Continue from last time</span>
                 </label>
+                <p id="chk-resume-hint" class="checkbox-hint">Skips files already updated (uses a small saved file in this folder).</p>
             </div>
         </div>
         <div class="file-list-container">
             <table class="file-list">
                 <thead>
                     <tr>
-                        <th>File</th>
-                        <th>JSON</th>
-                        <th>Status</th>
+                        <th scope="col" title="File name">File</th>
+                        <th scope="col" title="Whether Google Takeout left a companion file with date and location">Google info</th>
+                        <th scope="col" title="Whether this item is ready to be updated">Update status</th>
                     </tr>
                 </thead>
                 <tbody id="file-list-body"></tbody>
@@ -89,22 +120,31 @@
     <div id="view-processing" class="view">
         <div class="processing-content">
             <div class="processing-header">
-                <h2 id="processing-title">Working…</h2>
-                <div class="processing-controls" role="toolbar" aria-label="Fix progress controls">
+                <div class="processing-header-titles">
+                    <h2 id="processing-title">Processing…</h2>
+                    <p id="processing-subtitle" class="processing-subtitle">Copying date and location into your files. This may take a few minutes. You can pause or stop; progress is saved.</p>
+                </div>
+                <div class="processing-controls" role="toolbar" aria-label="Progress controls">
                     <div class="processing-controls-group">
-                        <button type="button" id="btn-fix-pause" class="btn btn-ghost btn-sm">Pause</button>
-                        <button type="button" id="btn-fix-resume" class="btn btn-ghost btn-sm hidden">Resume</button>
+                        <button type="button" id="btn-fix-pause" class="btn btn-ghost btn-sm" aria-describedby="hint-pause">Pause</button>
+                        <button type="button" id="btn-fix-resume" class="btn btn-ghost btn-sm hidden" aria-describedby="hint-resume">Resume</button>
                     </div>
-                    <button type="button" id="btn-fix-stop" class="btn btn-ghost btn-sm processing-stop">Stop</button>
+                    <button type="button" id="btn-fix-stop" class="btn btn-ghost btn-sm processing-stop" aria-describedby="hint-stop">Stop</button>
                 </div>
             </div>
+            <p id="hint-pause" class="visually-hidden">Pauses after the current file. Click Resume to continue.</p>
+            <p id="hint-resume" class="visually-hidden">Continues from where you paused.</p>
+            <p id="hint-stop" class="visually-hidden">Stops after the current file. Progress is saved. On the review screen, turn on Continue from last time to finish later.</p>
             <div class="progress-bar-container">
-                <div class="progress-bar" id="progress-bar" role="progressbar" aria-label="Metadata fix progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+                <div class="progress-bar" id="progress-bar" role="progressbar" aria-labelledby="processing-title" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0 percent"></div>
             </div>
             <div class="progress-info">
                 <span id="progress-text" aria-live="polite">0 / 0 (0%)</span>
             </div>
-            <div id="progress-file" class="progress-file"></div>
+            <div id="progress-file" class="progress-file">
+                <span id="progress-file-name" class="progress-file-name"></span>
+                <span id="progress-file-path" class="progress-file-path"></span>
+            </div>
         </div>
     </div>
 
@@ -112,20 +152,23 @@
         <div class="hero content-column">
             <h2 id="done-title">Done</h2>
             <p id="done-resume-note" class="done-resume-note hidden"></p>
-            <div class="stats-row">
-                <div class="stat-card stat-ok">
+            <p id="done-summary" class="done-summary">Results for this run.</p>
+            <div class="stats-row" aria-describedby="done-stats-desc">
+                <span id="done-stats-desc" class="visually-hidden">Results for this update run.</span>
+                <div class="stat-card stat-ok" title="Date and location were written successfully">
                     <span class="stat-value" id="result-success">0</span>
-                    <span class="stat-label">Success</span>
+                    <span class="stat-label">Succeeded</span>
                 </div>
-                <div class="stat-card stat-warn">
+                <div class="stat-card stat-warn" title="Left unchanged on purpose, e.g. already done or no companion file">
                     <span class="stat-value" id="result-skipped">0</span>
                     <span class="stat-label">Skipped</span>
                 </div>
-                <div class="stat-card stat-err">
+                <div class="stat-card stat-err" title="ExifTool could not update this file">
                     <span class="stat-value" id="result-failed">0</span>
                     <span class="stat-label">Failed</span>
                 </div>
             </div>
+            <p id="done-legend" class="done-legend"><strong>Succeeded</strong> — date and location saved in the file. <strong>Skipped</strong> — not changed (already done or no info file). <strong>Failed</strong> — error; you can try again.</p>
             <p id="result-json-delete" class="done-extra hidden"></p>
             <button id="btn-restart" class="btn btn-primary">Start over</button>
         </div>
