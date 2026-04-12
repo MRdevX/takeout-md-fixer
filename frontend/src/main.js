@@ -35,7 +35,8 @@ const PROCESSING_SUBTITLE_DEFAULT =
 const PROCESSING_SUBTITLE_PAUSED =
     "Paused. Click Resume to continue, or Stop to finish after this file. Progress is saved.";
 
-const stepperItems = document.querySelectorAll("#app-stepper .stepper-item");
+const stepperSteps = document.querySelectorAll("#app-stepper .stepper-step");
+const stepperRails = document.querySelectorAll("#app-stepper .stepper-rail");
 
 /** @param {string} filePath */
 function basename(filePath) {
@@ -50,25 +51,37 @@ function basename(filePath) {
  * @param {"welcome" | "scan" | "processing" | "done"} name
  */
 function updateStepper(name) {
-    if (!stepperItems.length) return;
-    stepperItems.forEach((el) => {
-        el.classList.remove("stepper-item--current", "stepper-item--complete");
+    if (!stepperSteps.length) return;
+    stepperSteps.forEach((el) => {
+        el.classList.remove("stepper-step--current", "stepper-step--complete");
         el.removeAttribute("aria-current");
     });
+    stepperRails.forEach((el) => el.classList.remove("stepper-rail--complete"));
+
     if (name === "welcome") {
-        stepperItems[0].classList.add("stepper-item--current");
-        stepperItems[0].setAttribute("aria-current", "step");
+        if (stepperSteps[0]) {
+            stepperSteps[0].classList.add("stepper-step--current");
+            stepperSteps[0].setAttribute("aria-current", "step");
+        }
     } else if (name === "scan") {
-        stepperItems[0].classList.add("stepper-item--complete");
-        stepperItems[1].classList.add("stepper-item--current");
-        stepperItems[1].setAttribute("aria-current", "step");
+        if (stepperSteps[0]) stepperSteps[0].classList.add("stepper-step--complete");
+        if (stepperRails[0]) stepperRails[0].classList.add("stepper-rail--complete");
+        if (stepperSteps[1]) {
+            stepperSteps[1].classList.add("stepper-step--current");
+            stepperSteps[1].setAttribute("aria-current", "step");
+        }
     } else if (name === "processing") {
-        stepperItems[0].classList.add("stepper-item--complete");
-        stepperItems[1].classList.add("stepper-item--complete");
-        stepperItems[2].classList.add("stepper-item--current");
-        stepperItems[2].setAttribute("aria-current", "step");
+        if (stepperSteps[0]) stepperSteps[0].classList.add("stepper-step--complete");
+        if (stepperSteps[1]) stepperSteps[1].classList.add("stepper-step--complete");
+        if (stepperRails[0]) stepperRails[0].classList.add("stepper-rail--complete");
+        if (stepperRails[1]) stepperRails[1].classList.add("stepper-rail--complete");
+        if (stepperSteps[2]) {
+            stepperSteps[2].classList.add("stepper-step--current");
+            stepperSteps[2].setAttribute("aria-current", "step");
+        }
     } else if (name === "done") {
-        stepperItems.forEach((el) => el.classList.add("stepper-item--complete"));
+        stepperSteps.forEach((el) => el.classList.add("stepper-step--complete"));
+        stepperRails.forEach((el) => el.classList.add("stepper-rail--complete"));
     }
 }
 

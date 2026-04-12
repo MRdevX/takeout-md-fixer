@@ -24,18 +24,20 @@
     </div>
 
     <nav id="app-stepper" class="stepper" aria-label="Steps">
-        <ol class="stepper-list">
-            <li class="stepper-item" id="stepper-step-welcome">
-                <span class="stepper-num" aria-hidden="true">1</span>
-                <span class="stepper-text">Folder</span>
+        <ol class="stepper-grid">
+            <li class="stepper-step" id="stepper-step-welcome">
+                <span class="stepper-marker" aria-hidden="true">1</span>
+                <span class="stepper-label">Folder</span>
             </li>
-            <li class="stepper-item" id="stepper-step-scan">
-                <span class="stepper-num" aria-hidden="true">2</span>
-                <span class="stepper-text">Review</span>
+            <li class="stepper-rail" aria-hidden="true"><span class="stepper-rail-line"></span></li>
+            <li class="stepper-step" id="stepper-step-scan">
+                <span class="stepper-marker" aria-hidden="true">2</span>
+                <span class="stepper-label">Review</span>
             </li>
-            <li class="stepper-item" id="stepper-step-processing">
-                <span class="stepper-num" aria-hidden="true">3</span>
-                <span class="stepper-text">Update</span>
+            <li class="stepper-rail" aria-hidden="true"><span class="stepper-rail-line"></span></li>
+            <li class="stepper-step" id="stepper-step-processing">
+                <span class="stepper-marker" aria-hidden="true">3</span>
+                <span class="stepper-label">Update</span>
             </li>
         </ol>
     </nav>
@@ -62,7 +64,10 @@
             </div>
             <div id="scan-path" class="folder-path" title=""></div>
             <details class="scan-glossary">
-                <summary class="scan-glossary-summary">What do these numbers mean?</summary>
+                <summary class="scan-glossary-summary disclosure-summary">
+                    <span class="disclosure-chevron" aria-hidden="true"></span>
+                    <span class="disclosure-summary-text">What do these numbers mean?</span>
+                </summary>
                 <ul class="scan-glossary-list">
                     <li><strong>Photos &amp; videos</strong> — All pictures and videos we found in the folder you chose.</li>
                     <li><strong>Have Google’s info</strong> — There’s a small extra file from Takeout with date and place; we can update the media file.</li>
@@ -105,9 +110,9 @@
             </div>
         </div>
         <details id="file-list-details" class="file-list-details content-column">
-            <summary class="file-list-details-summary" id="file-list-summary">
-                <span class="file-list-details-chevron" aria-hidden="true"></span>
-                <span id="file-list-summary-text">Show file list</span>
+            <summary class="file-list-details-summary disclosure-summary" id="file-list-summary">
+                <span class="disclosure-chevron disclosure-chevron--accent" aria-hidden="true"></span>
+                <span class="disclosure-summary-text" id="file-list-summary-text">Show file list</span>
             </summary>
             <div class="file-list-container">
                 <table class="file-list">
