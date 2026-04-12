@@ -19,9 +19,8 @@
       <div id="exiftool-warning" class="exiftool-banner hidden" role="alert">
         <p class="exiftool-banner-msg"></p>
         <p class="exiftool-banner-hint">
-          This app needs <strong>ExifTool</strong> to update your files. Install it from
-          <a href="#" id="exiftool-doc-link" class="inline-link">exiftool.org</a>, then restart the app. You can also click
-          <strong>Try again</strong> after installing.
+          Install <strong>ExifTool</strong> from
+          <a href="#" id="exiftool-doc-link" class="inline-link">exiftool.org</a>, restart the app, or tap <strong>Try again</strong>.
         </p>
         <button type="button" id="btn-exiftool-recheck" class="btn btn-ghost btn-sm">Try again</button>
       </div>
@@ -53,13 +52,11 @@
         <div class="hero content-column">
           <h1>Takeout Metadata Fixer</h1>
           <p class="subtitle">
-            Put the correct dates and places <em>inside</em> your Google Takeout photos and videos so iCloud, a NAS, or other
-            apps show them properly. You’ll need a small helper app called ExifTool (see the note at the top if it’s
-            missing).
+            Copies date and location from Google Takeout <code>.json</code> sidecars into your photos and videos so other apps
+            show them correctly. Needs <strong>ExifTool</strong> (see the banner if it is missing).
           </p>
           <p class="subtitle-trust">
-            This app <strong>writes into your media files</strong>. If you’re unsure, copy your Takeout folder somewhere safe
-            first.
+            <strong>Writes to your files.</strong> Use a copy of your library if you want to be safe.
           </p>
           <button id="btn-select" class="btn btn-primary">Select folder</button>
           <button type="button" id="btn-about" class="chrome-btn hero-about">About</button>
@@ -72,51 +69,54 @@
             <div class="scan-header-copy">
               <h2>Review</h2>
               <p class="scan-subtitle">
-                Summary of this folder. Start when you’re ready—we’ll copy date and location from Google’s companion files
-                into your photos and videos.
+                Folder summary. <strong>Start</strong> copies date and location from Takeout JSON into matching files.
               </p>
             </div>
             <button id="btn-fix" class="btn btn-primary" aria-describedby="btn-fix-hint">Start</button>
-            <p id="btn-fix-hint" class="btn-fix-hint">
-              Only files with a companion JSON are updated. Large folders can take a while.
-            </p>
+            <p id="btn-fix-hint" class="btn-fix-hint">Only files with a sidecar JSON are updated. Big folders take longer.</p>
           </div>
           <div id="scan-path" class="folder-path" title=""></div>
           <details class="scan-glossary">
             <summary class="scan-glossary-summary disclosure-summary">
               <span class="disclosure-chevron" aria-hidden="true"></span>
-              <span class="disclosure-summary-text">What do these numbers mean?</span>
+              <span class="disclosure-summary-text">What the counts mean</span>
             </summary>
             <ul class="scan-glossary-list">
-              <li><strong>Photos &amp; videos</strong> — All pictures and videos we found in the folder you chose.</li>
               <li>
-                <strong>Have Google’s info</strong> — There’s a small extra file from Takeout with date and place; we can
-                update the media file.
+                <strong class="scan-glossary-term">Photos &amp; videos</strong>
+                <span class="scan-glossary-desc">Supported images and videos in this folder.</span>
               </li>
-              <li><strong>No extra info file</strong> — Nothing to copy from; the file is left as-is.</li>
               <li>
-                <strong>Extra files not paired</strong> — Takeout-style files that don’t match a photo or video here (often
-                harmless).
+                <strong class="scan-glossary-term">With sidecar</strong>
+                <span class="scan-glossary-desc">A Takeout JSON sits next to the file; it can be updated.</span>
+              </li>
+              <li>
+                <strong class="scan-glossary-term">No sidecar</strong>
+                <span class="scan-glossary-desc">No JSON to read; the file is left as-is.</span>
+              </li>
+              <li>
+                <strong class="scan-glossary-term">Unpaired JSON</strong>
+                <span class="scan-glossary-desc">Sidecar files with no matching media here (usually harmless).</span>
               </li>
             </ul>
           </details>
           <div class="stats-row" aria-describedby="stats-desc">
-            <span id="stats-desc" class="visually-hidden">Summary counts for the selected folder.</span>
-            <div class="stat-card" title="All supported photos and videos in this folder">
+            <span id="stats-desc" class="visually-hidden">Counts for the selected folder.</span>
+            <div class="stat-card" title="All supported media in this folder">
               <span class="stat-value" id="stat-total">0</span>
               <span class="stat-label">Photos &amp; videos</span>
             </div>
-            <div class="stat-card stat-ok" title="Google Takeout included a companion file with date and location">
+            <div class="stat-card stat-ok" title="Takeout JSON sidecar next to the file">
               <span class="stat-value" id="stat-matched">0</span>
-              <span class="stat-label">Have Google’s info</span>
+              <span class="stat-label">With sidecar</span>
             </div>
-            <div class="stat-card stat-warn" title="No matching Takeout companion file next to this media">
+            <div class="stat-card stat-warn" title="No matching JSON sidecar">
               <span class="stat-value" id="stat-unmatched">0</span>
-              <span class="stat-label">No extra info file</span>
+              <span class="stat-label">No sidecar</span>
             </div>
-            <div class="stat-card stat-orphan" title="JSON files that are not paired with a listed photo or video">
+            <div class="stat-card stat-orphan" title="JSON files with no matching media">
               <span class="stat-value" id="stat-orphan-json">0</span>
-              <span class="stat-label">Extra files not paired</span>
+              <span class="stat-label">Unpaired JSON</span>
             </div>
           </div>
           <p id="checkpoint-hint" class="checkpoint-hint hidden" role="status"></p>
@@ -124,11 +124,10 @@
           <div class="scan-options">
             <label class="checkbox-row">
               <input type="checkbox" id="chk-delete-json" checked aria-describedby="chk-delete-json-hint" />
-              <span>After a successful update, remove Google’s companion JSON files</span>
+              <span>After a successful run, delete Takeout JSON sidecars</span>
             </label>
             <p id="chk-delete-json-hint" class="checkbox-hint">
-              Dates and locations stay in your media; this only removes the extra Takeout sidecar files. Turn off to keep
-              them.
+              Metadata stays in your media. Turn off to keep the <code>.json</code> files.
             </p>
           </div>
         </div>
@@ -139,14 +138,13 @@
           <div class="processing-header">
             <h2 id="processing-title">Processing…</h2>
             <p id="processing-subtitle" class="processing-subtitle">
-              Copying date and location into your files. This may take a few minutes. You can pause or stop; progress is
-              saved.
+              Writing metadata. Pause or stop anytime; progress is saved.
             </p>
           </div>
-          <p id="hint-pause" class="visually-hidden">Pauses after the current file. Click Resume to continue.</p>
-          <p id="hint-resume" class="visually-hidden">Continues from where you paused.</p>
+          <p id="hint-pause" class="visually-hidden">Pauses after the current file.</p>
+          <p id="hint-resume" class="visually-hidden">Continues from pause.</p>
           <p id="hint-stop" class="visually-hidden">
-            Stops after the current file. Progress is saved. Open the same folder again and press Start to finish later.
+            Stops after the current file. Reopen the same folder and press Start to resume.
           </p>
           <div class="progress-bar-container">
             <div
@@ -185,26 +183,27 @@
         <div class="hero content-column">
           <h2 id="done-title">Done</h2>
           <p id="done-resume-note" class="done-resume-note hidden"></p>
-          <p id="done-summary" class="done-summary">Results for this run.</p>
+          <p id="done-summary" class="done-summary">This run.</p>
           <div class="stats-row" aria-describedby="done-stats-desc">
-            <span id="done-stats-desc" class="visually-hidden">Results for this update run.</span>
-            <div class="stat-card stat-ok" title="Date and location were written successfully">
+            <span id="done-stats-desc" class="visually-hidden">Outcome counts for this run.</span>
+            <div class="stat-card stat-ok" title="Metadata written">
               <span class="stat-value" id="result-success">0</span>
               <span class="stat-label">Succeeded</span>
             </div>
-            <div class="stat-card stat-warn" title="Left unchanged on purpose, e.g. already done or no companion file">
+            <div class="stat-card stat-warn" title="Unchanged (e.g. already done or no sidecar)">
               <span class="stat-value" id="result-skipped">0</span>
               <span class="stat-label">Skipped</span>
             </div>
-            <div class="stat-card stat-err" title="ExifTool could not update this file">
+            <div class="stat-card stat-err" title="ExifTool error">
               <span class="stat-value" id="result-failed">0</span>
               <span class="stat-label">Failed</span>
             </div>
           </div>
-          <p id="done-legend" class="done-legend">
-            <strong>Succeeded</strong> — date and location saved in the file. <strong>Skipped</strong> — not changed (already
-            done or no info file). <strong>Failed</strong> — error; you can try again.
-          </p>
+          <ul id="done-legend" class="done-legend">
+            <li><strong>Succeeded:</strong> metadata written to the file.</li>
+            <li><strong>Skipped:</strong> left unchanged.</li>
+            <li><strong>Failed:</strong> error; you can try again.</li>
+          </ul>
           <p id="result-json-delete" class="done-extra hidden"></p>
           <button id="btn-restart" class="btn btn-primary">Start over</button>
         </div>
@@ -216,11 +215,10 @@
           <button type="button" class="modal-close" id="about-modal-close" aria-label="Close">×</button>
           <h2 id="about-title">About Takeout Metadata Fixer</h2>
           <p class="modal-lead">
-            When you get your photos from Google Takeout, there’s a small <code>.json</code> file next to each picture or
-            video. It holds the date, time, and location. This app copies that info into the files themselves (using a helper
-            called ExifTool) so when you import them somewhere else, everything shows up the way you’d expect.
+            Takeout adds a <code>.json</code> sidecar next to each item with date and place. This app copies that into the file
+            (via ExifTool) so imports look right in Photos, a NAS, and elsewhere.
           </p>
-          <p class="modal-story">I made this after my own messy Takeout import. Hope it helps you too.</p>
+          <p class="modal-story">Made after a messy Takeout import. Hope it helps.</p>
           <div class="about-dev">
             <h3 class="about-dev-title">Developer</h3>
             <p class="about-name">Mahdi Rashidi</p>
@@ -281,7 +279,7 @@
               </a>
             </div>
           </div>
-          <p class="modal-oss">Free for personal use and open source. Thanks for any support:</p>
+          <p class="modal-oss">Free and open source. Support is welcome:</p>
           <div class="bmc-slot">
             <script
               type="text/javascript"
@@ -298,8 +296,8 @@
             ></script>
           </div>
           <p class="bmc-fallback">
-            If the button doesn’t show:
             <a href="https://www.buymeacoffee.com/mrdevx" target="_blank" rel="noopener noreferrer">Buy me a coffee</a>
+            if the button does not load.
           </p>
         </div>
       </div>

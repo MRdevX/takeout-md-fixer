@@ -6,12 +6,17 @@
     padding: 0;
 }
 
+/* Beat component display rules (e.g. .chrome-btn) so the HTML hidden attribute actually hides. */
+[hidden] {
+    display: none !important;
+}
+
 :root {
-    /* Type scale (16px base — matches default browser / OS UI conventions) */
+    /* Type scale (16px base; matches default browser / OS UI conventions) */
     --font-size-xs: 0.75rem; /* 12px */
     --font-size-sm: 0.875rem; /* 14px */
     --font-size-base: 1rem; /* 16px */
-    --font-size-md: 1.0625rem; /* 17px — optional emphasis */
+    --font-size-md: 1.0625rem; /* 17px, optional emphasis */
     --font-size-lg: 1.125rem; /* 18px */
     --font-size-xl: 1.25rem; /* 20px */
     --font-size-2xl: 1.5rem; /* 24px */
@@ -118,7 +123,7 @@ html.platform-macos .app-topbar {
     -webkit-user-select: none;
 }
 
-/* Secondary actions (Back, About): same surface language as stat cards / glossary — not primary pill CTA */
+/* Secondary actions (Back, About): same surface language as stat cards / glossary, not primary pill CTA */
 .chrome-btn {
     display: inline-flex;
     align-items: center;
@@ -272,7 +277,9 @@ html.platform-macos .app-topbar {
     margin-bottom: var(--space-3);
 }
 
-.modal-lead code {
+.modal-lead code,
+.subtitle code,
+.checkbox-hint code {
     font-size: 0.88em;
     background: var(--bg-subtle);
     padding: 1px 6px;
@@ -588,6 +595,11 @@ h2 {
     font-size: var(--font-size-sm);
     line-height: var(--line-height-body);
     max-width: 42rem;
+}
+
+.scan-subtitle strong {
+    color: var(--text);
+    font-weight: 600;
 }
 
 .scan-header-copy {
@@ -1074,11 +1086,23 @@ details[open] > summary .disclosure-chevron::before {
 }
 
 .scan-glossary-list li {
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-3);
 }
 
 .scan-glossary-list li:last-child {
     margin-bottom: 0;
+}
+
+.scan-glossary-term {
+    display: block;
+    color: var(--text);
+    font-size: inherit;
+    font-weight: 600;
+    margin-bottom: var(--space-1);
+}
+
+.scan-glossary-desc {
+    display: block;
 }
 
 .checkbox-hint {
@@ -1136,14 +1160,23 @@ details[open] > summary .disclosure-chevron::before {
 }
 
 .done-legend {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-3) auto var(--space-3);
     font-size: var(--font-size-sm);
     color: var(--text-muted);
-    text-align: center;
-    max-width: 36rem;
+    text-align: left;
+    max-width: 22rem;
     width: 100%;
-    line-height: 1.55;
-    margin-top: var(--space-3);
-    margin-bottom: var(--space-3);
+    line-height: var(--line-height-relaxed);
+}
+
+.done-legend li {
+    margin-bottom: var(--space-2);
+}
+
+.done-legend li:last-child {
+    margin-bottom: 0;
 }
 
 .done-legend strong {

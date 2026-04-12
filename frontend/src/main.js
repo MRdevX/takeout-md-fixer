@@ -27,9 +27,8 @@ const btnFixStop = document.getElementById("btn-fix-stop");
 const checkpointHint = document.getElementById("checkpoint-hint");
 const scanEmptyMessage = document.getElementById("scan-empty-message");
 
-const PROCESSING_SUBTITLE_DEFAULT =
-  "Copying date and location into your files. This may take a few minutes. You can pause or stop; progress is saved.";
-const PROCESSING_SUBTITLE_PAUSED = "Paused. Click Resume to continue, or Stop to finish after this file. Progress is saved.";
+const PROCESSING_SUBTITLE_DEFAULT = "Writing metadata. Pause or stop anytime; progress is saved.";
+const PROCESSING_SUBTITLE_PAUSED = "Paused. Resume continues; Stop finishes after the current file.";
 
 const stepperSteps = document.querySelectorAll("#app-stepper .stepper-step");
 const stepperRails = document.querySelectorAll("#app-stepper .stepper-rail");
@@ -183,8 +182,7 @@ async function updateCheckpointHint() {
   try {
     const ok = await MetadataService.FixCheckpointAvailable(currentPath);
     if (ok) {
-      checkpointHint.textContent =
-        "Continuing from your last session — files already updated will be skipped automatically.";
+      checkpointHint.textContent = "Resuming. Files already updated are skipped.";
       checkpointHint.classList.remove("hidden");
     } else {
       checkpointHint.classList.add("hidden");
@@ -310,7 +308,7 @@ document.getElementById("btn-select").addEventListener("click", async () => {
     }
     const scanPathEl = document.getElementById("scan-path");
     if (scanPathEl) {
-      scanPathEl.textContent = `Folder: ${basename(path)}`;
+      scanPathEl.textContent = basename(path);
       scanPathEl.setAttribute("title", path);
     }
     document.getElementById("stat-total").textContent = "...";
@@ -325,7 +323,7 @@ document.getElementById("btn-select").addEventListener("click", async () => {
     console.error("SelectFolder/Scan error:", err);
     scanData = null;
     currentPath = "";
-    showScanErrorBanner("We couldn’t open or scan that folder. " + formatErrorMessage(err));
+    showScanErrorBanner("Could not open or scan that folder. " + formatErrorMessage(err));
     showView("welcome");
   } finally {
     views.scan?.setAttribute("aria-busy", "false");
@@ -364,7 +362,7 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
     const payload = event.data;
     if (payload.error) {
       console.error("Fix run failed:", payload.error);
-      showScanErrorBanner("The update didn’t finish. " + payload.error);
+      showScanErrorBanner("Update did not finish. " + payload.error);
       resetProcessingControls();
       showView("scan");
       void (async () => {
@@ -398,7 +396,7 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
   } catch (err) {
     offComplete();
     console.error("FixMetadata error:", err);
-    showScanErrorBanner("We couldn’t start the update. " + formatErrorMessage(err));
+    showScanErrorBanner("Could not start the update. " + formatErrorMessage(err));
     resetProcessingControls();
     showView("scan");
     await updateCheckpointHint();
@@ -435,7 +433,7 @@ function renderScanResults(data) {
 
   const scanPathEl = document.getElementById("scan-path");
   if (scanPathEl && data.folderPath) {
-    scanPathEl.textContent = `Folder: ${basename(data.folderPath)}`;
+    scanPathEl.textContent = basename(data.folderPath);
     scanPathEl.setAttribute("title", data.folderPath);
   }
 
@@ -446,7 +444,7 @@ function renderScanResults(data) {
 
   if (!data.files || data.files.length === 0) {
     if (scanEmptyMessage) {
-      scanEmptyMessage.textContent = "No supported photos or videos found in this folder.";
+      scanEmptyMessage.textContent = "No supported media in this folder.";
       scanEmptyMessage.classList.remove("hidden");
     }
     document.getElementById("btn-fix").disabled = true;
@@ -465,14 +463,14 @@ function renderDoneResults(result) {
   const doneSummary = document.getElementById("done-summary");
   if (doneSummary) {
     doneSummary.textContent = result.aborted
-      ? "Stopped before all files were processed. Progress is saved. Click Start over, select the same folder, and press Start to finish."
-      : "Results for this run.";
+      ? "Stopped early. Progress is saved: same folder, then Start, to continue."
+      : "This run.";
   }
 
   const resumeNote = document.getElementById("done-resume-note");
   if (resumeNote) {
     if (result.resumed) {
-      resumeNote.textContent = "Continued from a previous run.";
+      resumeNote.textContent = "Resumed from last time.";
       resumeNote.classList.remove("hidden");
     } else {
       resumeNote.textContent = "";
@@ -488,11 +486,11 @@ function renderDoneResults(result) {
   const parts = [];
   if (result.jsonDeleted > 0) {
     parts.push(
-      `Deleted ${result.jsonDeleted} extra info file${result.jsonDeleted === 1 ? "" : "s"} (dates and locations stay in your photos and videos).`,
+      `Removed ${result.jsonDeleted} sidecar JSON file${result.jsonDeleted === 1 ? "" : "s"} (metadata stays in media).`,
     );
   }
   if (result.jsonDeleteFailed > 0) {
-    parts.push(`Could not delete ${result.jsonDeleteFailed} extra info file${result.jsonDeleteFailed === 1 ? "" : "s"}.`);
+    parts.push(`Could not remove ${result.jsonDeleteFailed} sidecar JSON file${result.jsonDeleteFailed === 1 ? "" : "s"}.`);
   }
   if (parts.length > 0) {
     extra.textContent = parts.join(" ");
@@ -504,4 +502,4 @@ function renderDoneResults(result) {
 }
 
 refreshExiftoolStatus();
-updateStepper("welcome");
+showView("welcome");

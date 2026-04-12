@@ -46,7 +46,7 @@ func (s *MetadataService) SelectFolder() (string, error) {
 	dialog := app.Dialog.OpenFile()
 	dialog.CanChooseDirectories(true)
 	dialog.CanChooseFiles(false)
-	dialog.SetTitle("Select Google Takeout Folder")
+	dialog.SetTitle("Choose folder")
 	path, err := dialog.PromptForSingleSelection()
 	if err != nil {
 		return "", err
