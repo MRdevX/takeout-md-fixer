@@ -7,6 +7,9 @@ const year = new Date().getFullYear()
 </script>
 
 <template>
+  <div class="landing-bg-effects" aria-hidden="true" />
+  <div class="landing-edge-fade landing-edge-fade--top" aria-hidden="true" />
+  <div class="landing-edge-fade landing-edge-fade--bottom" aria-hidden="true" />
   <div class="page">
     <header class="site-header content-column">
       <RouterLink to="/" class="text-link header-link header-brand"
@@ -20,15 +23,17 @@ const year = new Date().getFullYear()
     <RouterView />
 
     <footer class="site-footer content-column">
-      <p class="footer-site">
-        <a class="text-link" :href="SITE_URL" target="_blank" rel="noopener noreferrer"
-          >mrashidi.me</a
-        >
-      </p>
-      <p class="footer-nav">
-        <RouterLink class="text-link" to="/privacy">Privacy</RouterLink>
-      </p>
-      <p class="footer-copy">© {{ year }} {{ COPYRIGHT_HOLDER }}. All rights reserved.</p>
+      <div class="footer-card">
+        <p class="footer-site">
+          <a class="text-link" :href="SITE_URL" target="_blank" rel="noopener noreferrer"
+            >mrashidi.me</a
+          >
+        </p>
+        <p class="footer-nav">
+          <RouterLink class="text-link" to="/privacy">Privacy</RouterLink>
+        </p>
+        <p class="footer-copy">© {{ year }} {{ COPYRIGHT_HOLDER }}. All rights reserved.</p>
+      </div>
     </footer>
   </div>
 </template>
@@ -37,6 +42,9 @@ const year = new Date().getFullYear()
 .header-brand {
   margin-right: auto;
   font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  letter-spacing: 0.02em;
 }
 
 .footer-nav {

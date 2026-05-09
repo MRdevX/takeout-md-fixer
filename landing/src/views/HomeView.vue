@@ -59,97 +59,137 @@ function onCarouselKeydown(e: KeyboardEvent) {
 
 <template>
   <main class="content-column">
-    <div class="hero">
-      <h1>Takeout Metadata Fixer</h1>
-      <p class="lead">
-        Desktop app for Google Takeout: reads <code class="inline-code">.json</code> sidecars next
-        to your photos and videos and writes dates, GPS, and related metadata into the files with
-        ExifTool. That way imports into iCloud, a NAS, or other tools see sensible dates and
-        locations.
-      </p>
-      <p class="lead">
-        <strong>Writes to your files.</strong> Use a copy of your library if you want to be safe.
-      </p>
+    <div class="hero-wrap">
+      <section class="hero-section">
+        <div class="hero-background" aria-hidden="true" />
+        <div class="hero-gradient-bg" aria-hidden="true" />
+        <div class="hero-inner">
+          <h1 class="cyberpunk-h1">Takeout Metadata Fixer</h1>
+          <p class="hero-tagline">Desktop · Google Takeout · ExifTool</p>
+          <p class="lead text-body">
+            Desktop app for Google Takeout: reads <code class="inline-code">.json</code> sidecars next to
+            your photos and videos and writes dates, GPS, and related metadata into the files with
+            ExifTool. That way imports into iCloud, a NAS, or other tools see sensible dates and
+            locations.
+          </p>
+          <p class="lead">
+            <strong>Writes to your files.</strong> Use a copy of your library if you want to be safe.
+          </p>
+        </div>
+      </section>
 
-      <aside class="landing-note" aria-label="ExifTool requirement">
-        <strong>ExifTool</strong> must be installed on your system; the app uses it to update
-        metadata. See
+      <aside class="landing-note content-section" aria-label="ExifTool requirement">
+        <strong>ExifTool</strong> must be installed on your system; the app uses it to update metadata.
+        See
         <a class="text-link" :href="EXIFTOOL_URL" target="_blank" rel="noopener noreferrer"
           >exiftool.org</a
         >
         for install steps.
       </aside>
 
-      <section
-        class="screens-carousel"
-        aria-labelledby="carousel-heading"
-        aria-roledescription="carousel"
-        tabindex="0"
-        @keydown="onCarouselKeydown"
-      >
-        <p id="carousel-heading" class="carousel-heading">Screenshots</p>
-        <div class="carousel-viewport">
-          <button
-            type="button"
-            class="carousel-nav carousel-nav-prev"
-            aria-label="Previous screenshot"
-            @click="goPrev"
+      <section class="screens-section" aria-labelledby="carousel-heading">
+        <h2 id="carousel-heading" class="section-label">
+          <svg
+            class="section-label-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
           >
-            <span aria-hidden="true">‹</span>
-          </button>
-          <div
-            class="carousel-track"
-            :style="{ transform: `translate3d(-${slideIndex * 100}%, 0, 0)` }"
-            role="group"
-            :aria-label="`Slide ${currentSlide} of ${slideCount}`"
-          >
-            <div
-              v-for="(slide, i) in SCREENSHOTS"
-              :key="slide.src"
-              class="carousel-slide"
-              :aria-hidden="i !== slideIndex"
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+            <circle cx="9" cy="9" r="2" />
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+          </svg>
+          Screenshots
+        </h2>
+        <div class="terminal-window">
+          <div class="terminal-window-inner">
+            <section
+              class="screens-carousel"
+              aria-roledescription="carousel"
+              tabindex="0"
+              @keydown="onCarouselKeydown"
             >
-              <img
-                :src="slide.src"
-                :alt="slide.alt"
-                :loading="i === 0 ? 'eager' : 'lazy'"
-                decoding="async"
-                class="carousel-img"
-              />
-            </div>
+              <div class="carousel-viewport">
+                <button
+                  type="button"
+                  class="carousel-nav carousel-nav-prev"
+                  aria-label="Previous screenshot"
+                  @click="goPrev"
+                >
+                  <span aria-hidden="true">‹</span>
+                </button>
+                <div
+                  class="carousel-track"
+                  :style="{ transform: `translate3d(-${slideIndex * 100}%, 0, 0)` }"
+                  role="group"
+                  :aria-label="`Slide ${currentSlide} of ${slideCount}`"
+                >
+                  <div
+                    v-for="(slide, i) in SCREENSHOTS"
+                    :key="slide.src"
+                    class="carousel-slide"
+                    :aria-hidden="i !== slideIndex"
+                  >
+                    <img
+                      :src="slide.src"
+                      :alt="slide.alt"
+                      :loading="i === 0 ? 'eager' : 'lazy'"
+                      decoding="async"
+                      class="carousel-img"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="carousel-nav carousel-nav-next"
+                  aria-label="Next screenshot"
+                  @click="goNext"
+                >
+                  <span aria-hidden="true">›</span>
+                </button>
+              </div>
+              <p class="carousel-status" aria-live="polite">{{ currentSlide }} of {{ slideCount }}</p>
+              <div class="carousel-dots" role="tablist" aria-label="Choose screenshot">
+                <button
+                  v-for="(slide, i) in SCREENSHOTS"
+                  :key="'dot-' + slide.src"
+                  type="button"
+                  role="tab"
+                  class="carousel-dot"
+                  :class="{ 'is-active': i === slideIndex }"
+                  :aria-selected="i === slideIndex"
+                  :tabindex="i === slideIndex ? 0 : -1"
+                  :aria-label="`Screenshot ${i + 1}: ${slide.alt}`"
+                  @click="goToSlide(i)"
+                />
+              </div>
+            </section>
           </div>
-          <button
-            type="button"
-            class="carousel-nav carousel-nav-next"
-            aria-label="Next screenshot"
-            @click="goNext"
-          >
-            <span aria-hidden="true">›</span>
-          </button>
-        </div>
-        <p class="carousel-status" aria-live="polite">{{ currentSlide }} of {{ slideCount }}</p>
-        <div class="carousel-dots" role="tablist" aria-label="Choose screenshot">
-          <button
-            v-for="(slide, i) in SCREENSHOTS"
-            :key="'dot-' + slide.src"
-            type="button"
-            role="tab"
-            class="carousel-dot"
-            :class="{ 'is-active': i === slideIndex }"
-            :aria-selected="i === slideIndex"
-            :tabindex="i === slideIndex ? 0 : -1"
-            :aria-label="`Screenshot ${i + 1}: ${slide.alt}`"
-            @click="goToSlide(i)"
-          />
         </div>
       </section>
 
-      <div class="landing-actions">
-        <a :href="RELEASES_URL" class="btn btn-primary" target="_blank" rel="noopener noreferrer"
-          >Download</a
-        >
-      </div>
-      <p class="landing-hint">Prebuilt macOS (DMG) and Windows builds on GitHub Releases.</p>
+      <section class="content-section cta-panel">
+        <div class="cta-section-bg" aria-hidden="true" />
+        <div class="cta-content">
+          <h2 class="cta-title">Ready to fix metadata</h2>
+          <p class="cta-description">
+            Prebuilt macOS (DMG) and Windows builds are published on GitHub Releases.
+          </p>
+          <div class="landing-actions">
+            <a :href="RELEASES_URL" class="btn" target="_blank" rel="noopener noreferrer">
+              Download
+            </a>
+          </div>
+          <p class="landing-hint">Verify checksums on the release page when you download.</p>
+        </div>
+      </section>
     </div>
   </main>
 </template>
@@ -158,29 +198,16 @@ function onCarouselKeydown(e: KeyboardEvent) {
 .screens-carousel {
   position: relative;
   width: 100%;
-  max-width: 34rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
-  margin-block: var(--space-2);
-}
-
-.carousel-heading {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .carousel-viewport {
   position: relative;
   width: 100%;
-  border-radius: var(--radius-lg);
-  border: none;
-  background: transparent;
-  box-shadow: none;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
@@ -204,7 +231,8 @@ function onCarouselKeydown(e: KeyboardEvent) {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgb(255 95 31 / 0.2);
 }
 
 .carousel-nav {
@@ -218,23 +246,26 @@ function onCarouselKeydown(e: KeyboardEvent) {
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: none;
+  border: 1px solid rgb(255 95 31 / 0.35);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 78%, var(--text) 12%);
-  color: var(--text);
+  background: rgb(17 19 24 / 0.82);
+  color: rgb(var(--foreground-rgb));
   font-size: 1.35rem;
   line-height: 1;
   cursor: pointer;
-  box-shadow: none;
   backdrop-filter: blur(8px);
   transition:
     background 0.15s,
-    color 0.15s;
+    color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .carousel-nav:hover {
-  background: color-mix(in srgb, var(--bg) 65%, var(--text) 18%);
-  color: var(--accent);
+  background: rgb(255 95 31 / 0.12);
+  color: var(--neon-orange);
+  border-color: rgb(255 95 31 / 0.55);
+  box-shadow: 0 0 16px rgb(255 95 31 / 0.2);
 }
 
 .carousel-nav:focus-visible {
@@ -277,7 +308,7 @@ function onCarouselKeydown(e: KeyboardEvent) {
   padding: 0;
   border: none;
   border-radius: 999px;
-  background: var(--text-soft);
+  background: #64748b;
   cursor: pointer;
   transition:
     background 0.15s,
@@ -285,11 +316,11 @@ function onCarouselKeydown(e: KeyboardEvent) {
 }
 
 .carousel-dot:hover {
-  background: var(--text-muted);
+  background: #94a3b8;
 }
 
 .carousel-dot.is-active {
-  background: var(--accent);
+  background: var(--neon-orange);
   transform: scale(1.15);
 }
 
