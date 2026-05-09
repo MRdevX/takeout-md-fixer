@@ -27,6 +27,7 @@ const year = new Date().getFullYear()
     <footer class="site-footer content-column">
       <div class="footer-card">
         <p class="footer-site">
+          Personal site:
           <a class="text-link" :href="SITE_URL" target="_blank" rel="noopener noreferrer"
             >mrashidi.me</a
           >

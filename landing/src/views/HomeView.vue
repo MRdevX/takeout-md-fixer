@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 
 const RELEASES_URL = 'https://github.com/MRdevX/takeout-md-fixer/releases'
 const GITHUB_ISSUES_URL = 'https://github.com/MRdevX/takeout-md-fixer/issues'
+const REPO_URL = 'https://github.com/MRdevX/takeout-md-fixer'
+const SITE_URL = 'https://mrashidi.me'
 
 const SCREENSHOTS = [
   {
@@ -229,6 +231,25 @@ function onCarouselKeydown(e: KeyboardEvent) {
             >
             if something is not working.
           </p>
+          <p class="landing-hint">
+            If this app is useful, please
+            <a class="text-link text-link--prose" :href="REPO_URL" target="_blank" rel="noopener noreferrer"
+              >star the project on GitHub</a
+            >. More from the author at
+            <a class="text-link text-link--prose" :href="SITE_URL" target="_blank" rel="noopener noreferrer"
+              >mrashidi.me</a
+            >.
+          </p>
+          <p class="landing-hint">If you like, you can buy me a coffee.</p>
+          <div class="landing-actions cta-bmc-wrap">
+            <iframe
+              class="cta-bmc-iframe"
+              src="/buy-me-a-coffee-embed.html"
+              title="Buy me a coffee"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </div>
       </section>
     </div>
@@ -236,6 +257,24 @@ function onCarouselKeydown(e: KeyboardEvent) {
 </template>
 
 <style scoped>
+.cta-bmc-wrap {
+    align-items: center;
+}
+
+.cta-bmc-iframe {
+    display: block;
+    margin-inline: auto;
+    width: 216px;
+    height: 62px;
+    max-width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    box-shadow: none;
+    overflow: hidden;
+    color-scheme: dark;
+}
+
 .screens-carousel {
     position: relative;
     width: 100%;
