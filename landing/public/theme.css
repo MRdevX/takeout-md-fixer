@@ -286,10 +286,61 @@ main.content-column {
     z-index: 2;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: var(--stack-md);
-    max-width: var(--measure-reading);
+    align-items: stretch;
+    width: 100%;
+    max-width: var(--width-page);
     margin-inline: auto;
+}
+
+.hero-heading {
+    text-align: center;
+    width: 100%;
+    margin-bottom: var(--space-6);
+}
+
+.hero-heading .cyberpunk-h1 {
+    margin-inline: auto;
+    margin-bottom: var(--space-3);
+    max-width: min(100%, 28ch);
+    text-align: center;
+}
+
+.hero-heading .hero-tagline {
+    margin: 0 auto;
+    max-width: 42rem;
+    text-align: center;
+    text-wrap: balance;
+    line-height: 1.55;
+}
+
+.hero-prose {
+    width: 100%;
+    max-width: min(var(--measure-reading), 68ch);
+    margin-inline: auto;
+    text-align: left;
+    font-size: var(--text-base);
+}
+
+.hero-prose .lead {
+    margin: 0;
+    color: rgb(226 232 240);
+    line-height: 1.65;
+    letter-spacing: 0.01em;
+    font-size: var(--text-base);
+}
+
+.hero-prose .lead + .lead {
+    margin-top: var(--space-5);
+}
+
+@media (min-width: 640px) {
+    .hero-heading {
+        margin-bottom: var(--space-8);
+    }
+
+    .hero-prose .lead + .lead {
+        margin-top: var(--space-6);
+    }
 }
 
 .cyberpunk-h1 {
@@ -305,20 +356,22 @@ main.content-column {
 }
 
 .hero-tagline {
-    font-family: var(--font-terminal);
-    font-size: clamp(0.875rem, 2vw, 1.125rem);
-    color: rgb(251 146 60);
-    font-weight: 500;
-    letter-spacing: 0.02em;
+    font-family: var(--font-body);
+    font-size: clamp(0.9375rem, 2.1vw, 1.0625rem);
+    color: var(--muted-foreground);
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
 .lead {
     color: var(--muted-foreground);
     width: 100%;
-    line-height: 1.75;
+    line-height: 1.65;
     font-size: var(--text-base);
     font-family: var(--font-body);
     text-wrap: pretty;
+    orphans: 3;
+    widows: 3;
 }
 
 .lead strong {
@@ -463,8 +516,8 @@ main.content-column {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--stack-md);
-    max-width: var(--measure-reading);
+    gap: var(--space-5);
+    max-width: min(var(--measure-reading), 40rem);
     margin-inline: auto;
 }
 
@@ -475,12 +528,20 @@ main.content-column {
     color: rgb(var(--foreground-rgb));
     letter-spacing: -0.02em;
     text-wrap: balance;
+    text-align: center;
+    width: 100%;
+    margin: 0;
 }
 
 .cta-description {
     font-size: var(--text-sm);
     color: var(--muted-foreground);
-    line-height: 1.7;
+    line-height: 1.65;
+    text-align: center;
+    text-wrap: pretty;
+    margin: 0;
+    max-width: 38rem;
+    padding-inline: var(--space-2);
 }
 
 .landing-actions {
@@ -490,16 +551,20 @@ main.content-column {
     justify-content: center;
     gap: var(--space-3);
     width: 100%;
+    margin-top: var(--space-1);
 }
 
 .landing-hint {
     font-size: var(--text-sm);
     color: var(--muted-foreground);
     line-height: 1.65;
+    text-align: center;
     text-wrap: pretty;
+    margin: 0;
+    max-width: 38rem;
+    padding-inline: var(--space-2);
 }
 
-/* Footer */
 .site-footer {
     margin-top: 0;
     padding-top: 0;
@@ -542,6 +607,12 @@ main.content-column {
 .text-link:hover {
     color: var(--neon-orange-soft);
     border-bottom-color: rgb(255 95 31 / 0.45);
+}
+
+/* Lower visual weight for links in body copy */
+.text-link--prose {
+    font-weight: 500;
+    text-underline-offset: 3px;
 }
 
 /* Buttons — base + modifiers (WCAG 2.5.5: min 44×44px) */

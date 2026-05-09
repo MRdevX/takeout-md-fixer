@@ -2,23 +2,24 @@
 import { computed, ref } from 'vue'
 
 const RELEASES_URL = 'https://github.com/MRdevX/takeout-md-fixer/releases'
+const GITHUB_ISSUES_URL = 'https://github.com/MRdevX/takeout-md-fixer/issues'
 
 const SCREENSHOTS = [
   {
     src: 'https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step1-main.png',
-    alt: 'Takeout Metadata Fixer — welcome screen with folder selection',
+    alt: 'Choose a Takeout folder before starting',
   },
   {
     src: 'https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step2-review.png',
-    alt: 'Review step showing folder summary and counts',
+    alt: 'Review scan summary before starting; optional delete JSON sidecars after success',
   },
   {
     src: 'https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step3-progress.png',
-    alt: 'Update in progress with progress bar',
+    alt: 'Progress while metadata is written to files; pause or stop available',
   },
   {
     src: 'https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step4-done.png',
-    alt: 'Done screen with succeeded, skipped, and failed counts',
+    alt: 'Finished: succeeded, skipped, and failed counts',
   },
 ] as const
 
@@ -85,17 +86,29 @@ function onCarouselKeydown(e: KeyboardEvent) {
         <div class="hero-background" aria-hidden="true" />
         <div class="hero-gradient-bg" aria-hidden="true" />
         <div class="hero-inner">
-          <h1 class="cyberpunk-h1">Takeout Metadata Fixer</h1>
-          <p class="hero-tagline">Desktop · Google Takeout · ExifTool</p>
-          <p class="lead">
-            Desktop app for Google Takeout: reads <code class="inline-code">.json</code> sidecars next to
-            your photos and videos and writes dates, GPS, and related metadata into the files with
-            ExifTool. That way imports into iCloud, a NAS, or other tools see sensible dates and
-            locations.
-          </p>
-          <p class="lead">
-            <strong>Writes to your files.</strong> Use a copy of your library if you want to be safe.
-          </p>
+          <div class="hero-heading">
+            <h1 class="cyberpunk-h1">Takeout Metadata Fixer</h1>
+            <p class="hero-tagline">
+              Copies dates and GPS from Google Takeout JSON files into your photos and videos.
+            </p>
+          </div>
+          <div class="hero-prose">
+            <p class="lead">
+              Takeout gives you JSON files next to your photos and videos with the taken time, GPS, and a few
+              other fields. A lot of programs only read the media file, so dates and locations look wrong even
+              though the export is fine. This app copies that data into the files. After that, things like
+              iCloud, a NAS import, or your usual photo app can show the dates and places you expect.
+            </p>
+            <p class="lead">
+              The app edits your originals on disk, so copy the folder first if you want to keep an untouched
+              backup.
+            </p>
+            <p class="lead">
+              You can pause or stop mid-run and resume later from a checkpoint file in that folder. After a
+              successful run you can optionally remove the JSON sidecars. The last screen shows how many files
+              succeeded, were skipped, or failed.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -168,7 +181,7 @@ function onCarouselKeydown(e: KeyboardEvent) {
                 </button>
               </div>
               <p class="carousel-status" aria-live="polite">{{ currentSlide }} of {{ slideCount }}</p>
-              <div class="carousel-dots" role="tablist" aria-label="Choose screenshot">
+              <div class="carousel-dots" role="tablist" aria-label="Screenshot thumbnails">
                 <button
                   v-for="(slide, i) in SCREENSHOTS"
                   :key="'dot-' + slide.src"
@@ -190,9 +203,10 @@ function onCarouselKeydown(e: KeyboardEvent) {
       <section class="content-section cta-panel">
         <div class="cta-section-bg" aria-hidden="true" />
         <div class="cta-content">
-          <h2 class="cta-title">Ready to fix metadata</h2>
+          <h2 class="cta-title">Download</h2>
           <p class="cta-description">
-            Prebuilt macOS (DMG) and Windows builds are published on GitHub Releases.
+            Signed builds for macOS (DMG) and Windows (.exe) are attached to each release on GitHub. Open the
+            latest one and download the installer for your system.
           </p>
           <div class="landing-actions">
             <a
@@ -201,10 +215,20 @@ function onCarouselKeydown(e: KeyboardEvent) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Download for macOS or Windows
+              Download from GitHub
             </a>
           </div>
-          <p class="landing-hint">Verify checksums on the release page when you download.</p>
+          <p class="landing-hint">
+            Each release lists checksums if you want to verify the file.
+            <a
+              class="text-link text-link--prose"
+              :href="GITHUB_ISSUES_URL"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Open an issue on GitHub</a
+            >
+            if something is not working.
+          </p>
         </div>
       </section>
     </div>
