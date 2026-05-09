@@ -76,12 +76,12 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding-block: var(--space-4);
+  padding-block: 0;
 }
 
 .privacy-article {
   width: 100%;
-  max-width: 40rem;
+  max-width: var(--article-width);
   margin-inline: auto;
   text-align: left;
   font-size: var(--text-sm);

@@ -25,6 +25,9 @@ const SCREENSHOTS = [
 
 const slideIndex = ref(0)
 
+const touchStartX = ref(0)
+const touchStartY = ref(0)
+
 const slideCount = SCREENSHOTS.length
 const currentSlide = computed(() => slideIndex.value + 1)
 
@@ -38,6 +41,25 @@ function goNext() {
 
 function goToSlide(i: number) {
   slideIndex.value = i
+}
+
+function onTouchStart(e: TouchEvent) {
+  const t = e.touches[0]
+  if (!t) return
+  touchStartX.value = t.clientX
+  touchStartY.value = t.clientY
+}
+
+function onTouchEnd(e: TouchEvent) {
+  const t = e.changedTouches[0]
+  if (!t) return
+  const dx = t.clientX - touchStartX.value
+  const dy = t.clientY - touchStartY.value
+  const adx = Math.abs(dx)
+  const ady = Math.abs(dy)
+  if (adx < 56 || adx < ady * 1.15) return
+  if (dx < 0) goNext()
+  else goPrev()
 }
 
 function onCarouselKeydown(e: KeyboardEvent) {
@@ -66,7 +88,7 @@ function onCarouselKeydown(e: KeyboardEvent) {
         <div class="hero-inner">
           <h1 class="cyberpunk-h1">Takeout Metadata Fixer</h1>
           <p class="hero-tagline">Desktop · Google Takeout · ExifTool</p>
-          <p class="lead text-body">
+          <p class="lead">
             Desktop app for Google Takeout: reads <code class="inline-code">.json</code> sidecars next to
             your photos and videos and writes dates, GPS, and related metadata into the files with
             ExifTool. That way imports into iCloud, a NAS, or other tools see sensible dates and
@@ -116,10 +138,10 @@ function onCarouselKeydown(e: KeyboardEvent) {
               tabindex="0"
               @keydown="onCarouselKeydown"
             >
-              <div class="carousel-viewport">
+              <div class="carousel-viewport" @touchstart.passive="onTouchStart" @touchend="onTouchEnd">
                 <button
                   type="button"
-                  class="carousel-nav carousel-nav-prev"
+                  class="btn btn--icon btn--media carousel-nav carousel-nav-prev"
                   aria-label="Previous screenshot"
                   @click="goPrev"
                 >
@@ -148,7 +170,7 @@ function onCarouselKeydown(e: KeyboardEvent) {
                 </div>
                 <button
                   type="button"
-                  class="carousel-nav carousel-nav-next"
+                  class="btn btn--icon btn--media carousel-nav carousel-nav-next"
                   aria-label="Next screenshot"
                   @click="goNext"
                 >
@@ -183,8 +205,13 @@ function onCarouselKeydown(e: KeyboardEvent) {
             Prebuilt macOS (DMG) and Windows builds are published on GitHub Releases.
           </p>
           <div class="landing-actions">
-            <a :href="RELEASES_URL" class="btn" target="_blank" rel="noopener noreferrer">
-              Download
+            <a
+              :href="RELEASES_URL"
+              class="btn btn--primary"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Download for macOS or Windows
             </a>
           </div>
           <p class="landing-hint">Verify checksums on the release page when you download.</p>
@@ -196,152 +223,158 @@ function onCarouselKeydown(e: KeyboardEvent) {
 
 <style scoped>
 .screens-carousel {
-  position: relative;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    outline: none;
 }
 
 .carousel-viewport {
-  position: relative;
-  width: 100%;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+    position: relative;
+    width: 100%;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    touch-action: pan-y pinch-zoom;
 }
 
 .carousel-track {
-  display: flex;
-  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    transition: transform 0.48s var(--ease-smooth);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .carousel-track {
-    transition: none;
-  }
+    .carousel-track {
+        transition: none;
+    }
 }
 
 .carousel-slide {
-  flex: 0 0 100%;
-  min-width: 0;
+    flex: 0 0 100%;
+    min-width: 0;
 }
 
 .carousel-img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgb(255 95 31 / 0.2);
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: min(85vh, 920px);
+    object-fit: contain;
+    object-position: top center;
+    border-radius: var(--radius-md);
+    border: 1px solid rgb(51 65 85 / 0.45);
+    background: rgb(10 12 16 / 0.5);
 }
 
 .carousel-nav {
-  position: absolute;
-  top: 50%;
-  z-index: 1;
-  translate: 0 -50%;
-  width: 2.5rem;
-  height: 2.5rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 1px solid rgb(255 95 31 / 0.35);
-  border-radius: 999px;
-  background: rgb(17 19 24 / 0.82);
-  color: rgb(var(--foreground-rgb));
-  font-size: 1.35rem;
-  line-height: 1;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition:
-    background 0.15s,
-    color 0.15s,
-    border-color 0.15s,
-    box-shadow 0.15s;
-}
-
-.carousel-nav:hover {
-  background: rgb(255 95 31 / 0.12);
-  color: var(--neon-orange);
-  border-color: rgb(255 95 31 / 0.55);
-  box-shadow: 0 0 16px rgb(255 95 31 / 0.2);
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    translate: 0 -50%;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.35rem;
+    line-height: 1;
 }
 
 .carousel-nav:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-offset);
+    z-index: 3;
 }
 
 .carousel-nav-prev {
-  left: var(--space-2);
+    left: max(var(--space-2), env(safe-area-inset-left));
 }
 
 .carousel-nav-next {
-  right: var(--space-2);
+    right: max(var(--space-2), env(safe-area-inset-right));
 }
 
 .carousel-status {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
 }
 
 .carousel-dots {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding-block: var(--space-1);
 }
 
 .carousel-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  background: #64748b;
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    transform 0.15s;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.carousel-dot:hover {
-  background: #94a3b8;
+.carousel-dot::after {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: #64748b;
+    transition:
+        background var(--duration-fast) var(--ease-out),
+        transform var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-fast) var(--ease-out);
 }
 
-.carousel-dot.is-active {
-  background: var(--neon-orange);
-  transform: scale(1.15);
+.carousel-dot:hover::after {
+    background: #94a3b8;
+}
+
+.carousel-dot.is-active::after {
+    background: var(--neon-orange);
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgb(255 95 31 / 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .carousel-dot.is-active::after {
+        transform: none;
+    }
 }
 
 .carousel-dot:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-offset);
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+    border-radius: var(--radius-sm);
 }
 
 @media (max-width: 480px) {
-  .carousel-nav {
-    width: 2.25rem;
-    height: 2.25rem;
-    font-size: 1.2rem;
-  }
+    .carousel-nav {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1.2rem;
+    }
 
-  .carousel-nav-prev {
-    left: var(--space-1);
-  }
+    .carousel-nav-prev {
+        left: var(--space-1);
+    }
 
-  .carousel-nav-next {
-    right: var(--space-1);
-  }
+    .carousel-nav-next {
+        right: var(--space-1);
+    }
 }
 </style>

@@ -7,15 +7,17 @@ const year = new Date().getFullYear()
 </script>
 
 <template>
-  <div class="landing-bg-effects" aria-hidden="true" />
-  <div class="landing-edge-fade landing-edge-fade--top" aria-hidden="true" />
-  <div class="landing-edge-fade landing-edge-fade--bottom" aria-hidden="true" />
+  <div class="landing-bg" aria-hidden="true" />
   <div class="page">
     <header class="site-header content-column">
       <RouterLink to="/" class="text-link header-link header-brand"
         >Takeout Metadata Fixer</RouterLink
       >
-      <a :href="REPO_URL" class="text-link header-link" target="_blank" rel="noopener noreferrer"
+      <a
+        :href="REPO_URL"
+        class="btn btn--ghost btn--sm header-github"
+        target="_blank"
+        rel="noopener noreferrer"
         >GitHub</a
       >
     </header>
@@ -49,5 +51,9 @@ const year = new Date().getFullYear()
 
 .footer-nav {
   margin-bottom: var(--space-2);
+}
+
+.header-github {
+  flex-shrink: 0;
 }
 </style>
