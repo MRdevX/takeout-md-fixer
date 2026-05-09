@@ -221,7 +221,7 @@ function onCarouselKeydown(e: KeyboardEvent) {
             </a>
           </div>
           <p class="landing-hint">
-            Each release lists checksums if you want to verify the file.
+            Every release lists checksums so you can confirm the installer before you run it.
             <a
               class="text-link text-link--prose"
               :href="GITHUB_ISSUES_URL"
@@ -229,18 +229,22 @@ function onCarouselKeydown(e: KeyboardEvent) {
               rel="noopener noreferrer"
               >Open an issue on GitHub</a
             >
-            if something is not working.
+            if anything misbehaves.
           </p>
           <p class="landing-hint">
-            If this app is useful, please
+            If the app saved you a headache:
             <a class="text-link text-link--prose" :href="REPO_URL" target="_blank" rel="noopener noreferrer"
-              >star the project on GitHub</a
-            >. More from the author at
+              >Star the repo on GitHub</a
+            >
+            so others can find it, or say thanks with a coffee below—stars, caffeine, both, or neither. Thank you
+            either way.
+          </p>
+          <p class="landing-hint">
+            For other projects and more about me, visit
             <a class="text-link text-link--prose" :href="SITE_URL" target="_blank" rel="noopener noreferrer"
               >mrashidi.me</a
             >.
           </p>
-          <p class="landing-hint">If you like, you can buy me a coffee.</p>
           <div class="landing-actions cta-bmc-wrap">
             <iframe
               class="cta-bmc-iframe"
