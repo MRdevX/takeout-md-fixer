@@ -24,18 +24,24 @@ const year = new Date().getFullYear()
 
     <RouterView />
 
-    <footer class="site-footer content-column">
-      <div class="footer-card">
-        <p class="footer-site">
-          Personal site:
-          <a class="text-link" :href="SITE_URL" target="_blank" rel="noopener noreferrer"
-            >mrashidi.me</a
-          >
-        </p>
-        <p class="footer-nav">
-          <RouterLink class="text-link" to="/privacy">Privacy</RouterLink>
-        </p>
-        <p class="footer-copy">© {{ year }} {{ COPYRIGHT_HOLDER }}. All rights reserved.</p>
+    <footer class="site-footer">
+      <div class="footer-inner content-column">
+        <nav class="footer-nav" aria-label="Footer">
+          <ul class="footer-links">
+            <li>
+              <RouterLink class="footer-link" to="/privacy">Privacy</RouterLink>
+            </li>
+            <li>
+              <a class="footer-link" :href="SITE_URL" target="_blank" rel="noopener noreferrer"
+                >mrashidi.me</a
+              >
+            </li>
+            <li>
+              <a class="footer-link" :href="REPO_URL" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </li>
+          </ul>
+        </nav>
+        <p class="footer-legal">© {{ year }} {{ COPYRIGHT_HOLDER }}. All rights reserved.</p>
       </div>
     </footer>
   </div>
@@ -48,10 +54,6 @@ const year = new Date().getFullYear()
   font-family: var(--font-display);
   font-size: var(--text-base);
   letter-spacing: 0.02em;
-}
-
-.footer-nav {
-  margin-bottom: var(--space-2);
 }
 
 .header-github {
