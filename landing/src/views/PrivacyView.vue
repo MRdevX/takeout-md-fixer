@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
 
 .privacy-article {
   width: 100%;
-  max-width: var(--article-width);
+  max-width: var(--measure-reading);
   margin-inline: auto;
   text-align: left;
   font-size: var(--text-sm);
@@ -102,8 +102,8 @@ onBeforeUnmount(() => {
 
 .privacy-meta {
   font-family: var(--font-terminal);
-  font-size: 0.8125rem;
-  color: #64748b;
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
   margin-bottom: var(--space-6);
 }
 

@@ -2,7 +2,6 @@
 import { computed, ref } from 'vue'
 
 const RELEASES_URL = 'https://github.com/MRdevX/takeout-md-fixer/releases'
-const EXIFTOOL_URL = 'https://exiftool.org/'
 
 const SCREENSHOTS = [
   {
@@ -99,15 +98,6 @@ function onCarouselKeydown(e: KeyboardEvent) {
           </p>
         </div>
       </section>
-
-      <aside class="landing-note content-section" aria-label="ExifTool requirement">
-        <strong>ExifTool</strong> must be installed on your system; the app uses it to update metadata.
-        See
-        <a class="text-link" :href="EXIFTOOL_URL" target="_blank" rel="noopener noreferrer"
-          >exiftool.org</a
-        >
-        for install steps.
-      </aside>
 
       <section class="screens-section" aria-labelledby="carousel-heading">
         <h2 id="carousel-heading" class="section-label">
@@ -228,14 +218,14 @@ function onCarouselKeydown(e: KeyboardEvent) {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-4);
+    gap: var(--stack-md);
     outline: none;
 }
 
 .carousel-viewport {
     position: relative;
     width: 100%;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-inner);
     overflow: hidden;
     touch-action: pan-y pinch-zoom;
 }
@@ -262,10 +252,10 @@ function onCarouselKeydown(e: KeyboardEvent) {
     display: block;
     width: 100%;
     height: auto;
-    max-height: min(85vh, 920px);
+    max-height: var(--screenshot-max-height);
     object-fit: contain;
     object-position: top center;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-inner);
     border: 1px solid rgb(51 65 85 / 0.45);
     background: rgb(10 12 16 / 0.5);
 }
@@ -275,9 +265,9 @@ function onCarouselKeydown(e: KeyboardEvent) {
     top: 50%;
     z-index: 2;
     translate: 0 -50%;
-    width: 2.75rem;
-    height: 2.75rem;
-    font-size: 1.35rem;
+    width: var(--carousel-nav-size);
+    height: var(--carousel-nav-size);
+    font-size: 1.25rem;
     line-height: 1;
 }
 
@@ -311,13 +301,13 @@ function onCarouselKeydown(e: KeyboardEvent) {
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: var(--space-3);
-    padding-block: var(--space-1);
+    gap: var(--space-2);
+    padding-block: var(--space-2);
 }
 
 .carousel-dot {
-    min-width: 2.75rem;
-    min-height: 2.75rem;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
     padding: 0;
     display: inline-flex;
     align-items: center;
@@ -330,8 +320,8 @@ function onCarouselKeydown(e: KeyboardEvent) {
 
 .carousel-dot::after {
     content: "";
-    width: 0.5rem;
-    height: 0.5rem;
+    width: var(--space-2);
+    height: var(--space-2);
     border-radius: 999px;
     background: #64748b;
     transition:
@@ -346,7 +336,7 @@ function onCarouselKeydown(e: KeyboardEvent) {
 
 .carousel-dot.is-active::after {
     background: var(--neon-orange);
-    transform: scale(1.2);
+    transform: scale(1.25);
     box-shadow: 0 0 10px rgb(255 95 31 / 0.35);
 }
 
@@ -359,22 +349,6 @@ function onCarouselKeydown(e: KeyboardEvent) {
 .carousel-dot:focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-offset);
-    border-radius: var(--radius-sm);
-}
-
-@media (max-width: 480px) {
-    .carousel-nav {
-        width: 2.5rem;
-        height: 2.5rem;
-        font-size: 1.2rem;
-    }
-
-    .carousel-nav-prev {
-        left: var(--space-1);
-    }
-
-    .carousel-nav-next {
-        right: var(--space-1);
-    }
+    border-radius: var(--radius-control);
 }
 </style>
