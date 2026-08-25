@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <g fill="#fdf6ec">
+    <path fill-rule="evenodd" d="M665 204a148 148 0 1 0 0 296 148 148 0 1 0 0-296zm0 38a110 110 0 1 1 0 220 110 110 0 1 1 0-220z"/>
+    <g stroke="#fdf6ec" stroke-width="30" stroke-linecap="round">
+      <line x1="665" y1="352" x2="665" y2="272"/>
+      <line x1="665" y1="352" x2="744" y2="352"/>
+    </g>
+    <circle cx="665" cy="352" r="17"/>
+    <path d="M150 830 L360 566 L500 742 L620 612 L880 830 Z"/>
+  </g>
+</svg>

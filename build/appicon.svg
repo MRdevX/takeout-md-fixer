@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f97316"/>
+      <stop offset="1" stop-color="#b64509"/>
+    </linearGradient>
+    <filter id="sh" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#261a0d" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)" filter="url(#sh)"/>
+
+  <g fill="#fdf6ec">
+    <!-- clock: ring + hands -->
+    <path fill-rule="evenodd" d="M665 204a148 148 0 1 0 0 296 148 148 0 1 0 0-296zm0 38a110 110 0 1 1 0 220 110 110 0 1 1 0-220z"/>
+    <g stroke="#fdf6ec" stroke-width="30" stroke-linecap="round">
+      <line x1="665" y1="352" x2="665" y2="272"/>
+      <line x1="665" y1="352" x2="744" y2="352"/>
+    </g>
+    <circle cx="665" cy="352" r="17"/>
+    <!-- landscape -->
+    <path d="M150 830 L360 566 L500 742 L620 612 L880 830 Z"/>
+  </g>
+</svg>
