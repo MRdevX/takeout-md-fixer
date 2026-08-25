@@ -13,12 +13,24 @@ const views = {
   done: document.getElementById("view-done"),
 };
 
+const STEP_LABELS = {
+  welcome: "",
+  scan: "STEP 2 OF 3 · REVIEW",
+  processing: "STEP 3 OF 3 · FIXING",
+  done: "",
+};
+
+const stepLabel = document.getElementById("step-label");
 const btnBack = document.getElementById("btn-back");
+const btnFix = document.getElementById("btn-fix");
 
 const processingTitle = document.getElementById("processing-title");
 const processingSubtitle = document.getElementById("processing-subtitle");
+const progressPercentEl = document.getElementById("progress-percent");
 const progressBarEl = document.getElementById("progress-bar");
+const progressSegments = progressBarEl ? Array.from(progressBarEl.querySelectorAll(".segment")) : [];
 const progressTextEl = document.getElementById("progress-text");
+const progressFileEl = document.getElementById("progress-file");
 const progressFileNameEl = document.getElementById("progress-file-name");
 const progressFilePathEl = document.getElementById("progress-file-path");
 const btnFixPause = document.getElementById("btn-fix-pause");
@@ -27,11 +39,18 @@ const btnFixStop = document.getElementById("btn-fix-stop");
 const checkpointHint = document.getElementById("checkpoint-hint");
 const scanEmptyMessage = document.getElementById("scan-empty-message");
 
-const PROCESSING_SUBTITLE_DEFAULT = "Writing metadata. Pause or stop anytime; progress is saved.";
-const PROCESSING_SUBTITLE_PAUSED = "Paused. Resume continues; Stop finishes after the current file.";
+const PROCESSING_SUBTITLE_DEFAULT = "You can stop anytime. The app remembers where it left off.";
+const PROCESSING_SUBTITLE_PAUSED = "Paused. Resume picks up where it stopped.";
 
-const stepperSteps = document.querySelectorAll("#app-stepper .stepper-step");
-const stepperRails = document.querySelectorAll("#app-stepper .stepper-rail");
+/** @param {number} n */
+function num(n) {
+  return Number(n || 0).toLocaleString();
+}
+
+/** @param {number} n @param {string} one @param {string} many */
+function plural(n, one, many) {
+  return Number(n) === 1 ? one : many;
+}
 
 /** @param {string} filePath */
 function basename(filePath) {
@@ -42,70 +61,34 @@ function basename(filePath) {
   return last || filePath;
 }
 
-/**
- * @param {"welcome" | "scan" | "processing" | "done"} name
- */
-function updateStepper(name) {
-  if (!stepperSteps.length) return;
-  stepperSteps.forEach((el) => {
-    el.classList.remove("stepper-step--current", "stepper-step--complete");
-    el.removeAttribute("aria-current");
-  });
-  stepperRails.forEach((el) => el.classList.remove("stepper-rail--complete"));
-
-  if (name === "welcome") {
-    if (stepperSteps[0]) {
-      stepperSteps[0].classList.add("stepper-step--current");
-      stepperSteps[0].setAttribute("aria-current", "step");
-    }
-  } else if (name === "scan") {
-    if (stepperSteps[0]) stepperSteps[0].classList.add("stepper-step--complete");
-    if (stepperRails[0]) stepperRails[0].classList.add("stepper-rail--complete");
-    if (stepperSteps[1]) {
-      stepperSteps[1].classList.add("stepper-step--current");
-      stepperSteps[1].setAttribute("aria-current", "step");
-    }
-  } else if (name === "processing") {
-    if (stepperSteps[0]) stepperSteps[0].classList.add("stepper-step--complete");
-    if (stepperSteps[1]) stepperSteps[1].classList.add("stepper-step--complete");
-    if (stepperRails[0]) stepperRails[0].classList.add("stepper-rail--complete");
-    if (stepperRails[1]) stepperRails[1].classList.add("stepper-rail--complete");
-    if (stepperSteps[2]) {
-      stepperSteps[2].classList.add("stepper-step--current");
-      stepperSteps[2].setAttribute("aria-current", "step");
-    }
-  } else if (name === "done") {
-    stepperSteps.forEach((el) => el.classList.add("stepper-step--complete"));
-    stepperRails.forEach((el) => el.classList.add("stepper-rail--complete"));
-  }
-}
-
 function showView(name) {
   Object.values(views).forEach((v) => v.classList.remove("active"));
   views[name].classList.add("active");
-  updateStepper(name);
-  const onScan = name === "scan";
-  btnBack.hidden = !onScan;
-  btnBack.setAttribute("aria-hidden", onScan ? "false" : "true");
+  if (stepLabel) stepLabel.textContent = STEP_LABELS[name] ?? "";
 }
 
 function setProcessingPaused(paused) {
   if (!processingTitle || !btnFixPause || !btnFixResume) return;
-  if (paused) {
-    processingTitle.textContent = "Paused";
-    if (processingSubtitle) processingSubtitle.textContent = PROCESSING_SUBTITLE_PAUSED;
-    btnFixPause.classList.add("hidden");
-    btnFixResume.classList.remove("hidden");
-  } else {
-    processingTitle.textContent = "Processing…";
-    if (processingSubtitle) processingSubtitle.textContent = PROCESSING_SUBTITLE_DEFAULT;
-    btnFixPause.classList.remove("hidden");
-    btnFixResume.classList.add("hidden");
+  processingTitle.textContent = paused ? "Paused" : "Processing…";
+  if (processingSubtitle) {
+    processingSubtitle.textContent = paused ? PROCESSING_SUBTITLE_PAUSED : PROCESSING_SUBTITLE_DEFAULT;
   }
+  btnFixPause.classList.toggle("hidden", paused);
+  btnFixResume.classList.toggle("hidden", !paused);
+  if (stepLabel) stepLabel.textContent = paused ? "STEP 3 OF 3 · PAUSED" : STEP_LABELS.processing;
 }
 
 function resetProcessingControls() {
   setProcessingPaused(false);
+}
+
+/** Light up whole segments, then part-fill the one the progress is inside. */
+function paintSegments(pct) {
+  const filled = (pct / 100) * progressSegments.length;
+  progressSegments.forEach((seg, i) => {
+    seg.classList.toggle("is-full", filled >= i + 1);
+    seg.classList.toggle("is-partial", filled > i && filled < i + 1);
+  });
 }
 
 function setProgressUi(current, total, file = "") {
@@ -114,26 +97,21 @@ function setProgressUi(current, total, file = "") {
   const boundedCurrent = safeTotal > 0 ? Math.min(safeCurrent, safeTotal) : safeCurrent;
   const pct = safeTotal > 0 ? Math.round((boundedCurrent / safeTotal) * 100) : 0;
 
+  if (progressPercentEl) progressPercentEl.textContent = String(pct);
+  paintSegments(pct);
+
   if (progressBarEl) {
-    progressBarEl.style.width = `${pct}%`;
     progressBarEl.setAttribute("aria-valuenow", String(pct));
     const valText = safeTotal > 0 ? `${boundedCurrent} of ${safeTotal} files, ${pct} percent` : `${pct} percent`;
     progressBarEl.setAttribute("aria-valuetext", valText);
   }
   if (progressTextEl) {
-    progressTextEl.textContent =
-      safeTotal > 0 ? `${boundedCurrent} of ${safeTotal} (${pct}%)` : `${boundedCurrent} of ${safeTotal} (${pct}%)`;
+    progressTextEl.textContent = `${num(boundedCurrent)} of ${num(safeTotal)} done`;
   }
   const base = basename(file);
-  if (progressFileNameEl && progressFilePathEl) {
-    if (!file) {
-      progressFileNameEl.textContent = "";
-      progressFilePathEl.textContent = "";
-    } else {
-      progressFileNameEl.textContent = base;
-      progressFilePathEl.textContent = base === file ? "" : file;
-    }
-  }
+  if (progressFileEl) progressFileEl.classList.toggle("hidden", !file);
+  if (progressFileNameEl) progressFileNameEl.textContent = base;
+  if (progressFilePathEl) progressFilePathEl.textContent = base === file ? "" : file;
 }
 
 let currentPath = "";
@@ -182,7 +160,7 @@ async function updateCheckpointHint() {
   try {
     const ok = await MetadataService.FixCheckpointAvailable(currentPath);
     if (ok) {
-      checkpointHint.textContent = "Resuming. Files already updated are skipped.";
+      checkpointHint.textContent = "Picking up where you left off. Files already fixed are skipped.";
       checkpointHint.classList.remove("hidden");
     } else {
       checkpointHint.classList.add("hidden");
@@ -201,7 +179,7 @@ async function refreshExiftoolStatus() {
       exiftoolWarningEl.classList.remove("hidden");
       const msgEl = exiftoolWarningEl.querySelector(".exiftool-banner-msg");
       if (msgEl) {
-        msgEl.textContent = st.message || "ExifTool not found.";
+        msgEl.textContent = st.message || "One thing is missing: ExifTool";
       }
     } else {
       exiftoolWarningEl.classList.add("hidden");
@@ -302,7 +280,8 @@ document.getElementById("btn-select").addEventListener("click", async () => {
 
     showView("scan");
     views.scan?.setAttribute("aria-busy", "true");
-    document.getElementById("btn-fix").disabled = true;
+    btnFix.disabled = true;
+    btnFix.textContent = "Fix files";
     if (scanEmptyMessage) {
       scanEmptyMessage.classList.add("hidden");
     }
@@ -311,10 +290,8 @@ document.getElementById("btn-select").addEventListener("click", async () => {
       scanPathEl.textContent = basename(path);
       scanPathEl.setAttribute("title", path);
     }
-    document.getElementById("stat-total").textContent = "...";
-    document.getElementById("stat-matched").textContent = "...";
-    document.getElementById("stat-unmatched").textContent = "...";
-    document.getElementById("stat-orphan-json").textContent = "...";
+    document.getElementById("stat-total").textContent = "…";
+    document.getElementById("stat-matched").textContent = "…";
 
     scanData = await MetadataService.ScanFolder(path);
     renderScanResults(scanData);
@@ -350,7 +327,7 @@ btnFixStop?.addEventListener("click", () => {
   MetadataService.FixAbort().catch((e) => console.error("FixAbort error:", e));
 });
 
-document.getElementById("btn-fix").addEventListener("click", async () => {
+btnFix.addEventListener("click", async () => {
   if (!currentPath || !exiftoolOk) return;
   hideScanErrorBanner();
   showView("processing");
@@ -362,7 +339,7 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
     const payload = event.data;
     if (payload.error) {
       console.error("Fix run failed:", payload.error);
-      showScanErrorBanner("Update did not finish. " + payload.error);
+      showScanErrorBanner("The run did not finish. " + payload.error);
       resetProcessingControls();
       showView("scan");
       void (async () => {
@@ -396,7 +373,7 @@ document.getElementById("btn-fix").addEventListener("click", async () => {
   } catch (err) {
     offComplete();
     console.error("FixMetadata error:", err);
-    showScanErrorBanner("Could not start the update. " + formatErrorMessage(err));
+    showScanErrorBanner("Could not start the run. " + formatErrorMessage(err));
     resetProcessingControls();
     showView("scan");
     await updateCheckpointHint();
@@ -426,10 +403,17 @@ Events.On("fix-progress", (event) => {
 });
 
 function renderScanResults(data) {
-  document.getElementById("stat-total").textContent = data.totalMedia;
-  document.getElementById("stat-matched").textContent = data.withJson;
-  document.getElementById("stat-unmatched").textContent = data.withoutJson;
-  document.getElementById("stat-orphan-json").textContent = data.orphanJson ?? 0;
+  const ready = Number(data.withJson) || 0;
+  const total = Number(data.totalMedia) || 0;
+  const noData = Number(data.withoutJson) || 0;
+  const orphans = Number(data.orphanJson) || 0;
+
+  document.getElementById("stat-matched").textContent = num(ready);
+  document.getElementById("stat-total").textContent = num(total);
+  document.getElementById("chip-ready").textContent = `${num(ready)} ready to fix`;
+  document.getElementById("chip-nodata").textContent = `${num(noData)} ${plural(noData, "has", "have")} no info to restore`;
+  document.getElementById("chip-orphan").textContent =
+    `${num(orphans)} extra .json ${plural(orphans, "file", "files")}, safe to ignore`;
 
   const scanPathEl = document.getElementById("scan-path");
   if (scanPathEl && data.folderPath) {
@@ -444,33 +428,45 @@ function renderScanResults(data) {
 
   if (!data.files || data.files.length === 0) {
     if (scanEmptyMessage) {
-      scanEmptyMessage.textContent = "No supported media in this folder.";
+      scanEmptyMessage.textContent = "No photos or videos this app can read in that folder.";
       scanEmptyMessage.classList.remove("hidden");
     }
-    document.getElementById("btn-fix").disabled = true;
+    btnFix.disabled = true;
+    btnFix.textContent = "Fix files";
     return;
   }
 
-  document.getElementById("btn-fix").disabled = data.withJson === 0 || !exiftoolOk;
+  btnFix.disabled = ready === 0 || !exiftoolOk;
+  btnFix.textContent = ready > 0 ? `Fix ${num(ready)} ${plural(ready, "file", "files")}` : "Nothing to fix here";
 }
 
 function renderDoneResults(result) {
+  const success = Number(result.success) || 0;
   const doneTitle = document.getElementById("done-title");
   if (doneTitle) {
-    doneTitle.textContent = result.aborted ? "Stopped" : "Done";
+    if (result.aborted) {
+      doneTitle.textContent = `Stopped after ${num(success)} ${plural(success, "photo", "photos")}.`;
+    } else if (success > 0) {
+      doneTitle.textContent = `${num(success)} ${plural(success, "photo", "photos")} got ${plural(success, "its", "their")} ${plural(success, "date", "dates")} back.`;
+    } else {
+      doneTitle.textContent = "Nothing needed changing.";
+    }
   }
 
   const doneSummary = document.getElementById("done-summary");
   if (doneSummary) {
     doneSummary.textContent = result.aborted
-      ? "Stopped early. Progress is saved: same folder, then Start, to continue."
+      ? "Stopped early. Your progress is saved: open the same folder and start again to carry on."
       : "This run.";
   }
 
   const resumeNote = document.getElementById("done-resume-note");
   if (resumeNote) {
-    if (result.resumed) {
-      resumeNote.textContent = "Resumed from last time.";
+    const notes = [];
+    if (result.resumed) notes.push("Carried on from last time.");
+    if (result.aborted) notes.push("Open this folder again to finish the rest.");
+    if (notes.length > 0) {
+      resumeNote.textContent = notes.join(" ");
       resumeNote.classList.remove("hidden");
     } else {
       resumeNote.textContent = "";
@@ -478,19 +474,21 @@ function renderDoneResults(result) {
     }
   }
 
-  document.getElementById("result-success").textContent = result.success;
-  document.getElementById("result-skipped").textContent = result.skipped;
-  document.getElementById("result-failed").textContent = result.failed;
+  document.getElementById("result-success").textContent = num(success);
+  document.getElementById("result-skipped").textContent = num(result.skipped);
+  document.getElementById("result-failed").textContent = num(result.failed);
 
   const extra = document.getElementById("result-json-delete");
   const parts = [];
   if (result.jsonDeleted > 0) {
     parts.push(
-      `Removed ${result.jsonDeleted} sidecar JSON file${result.jsonDeleted === 1 ? "" : "s"} (metadata stays in media).`,
+      `Deleted ${num(result.jsonDeleted)} .json ${plural(result.jsonDeleted, "file", "files")}. Their info is now saved inside your photos.`,
     );
   }
   if (result.jsonDeleteFailed > 0) {
-    parts.push(`Could not remove ${result.jsonDeleteFailed} sidecar JSON file${result.jsonDeleteFailed === 1 ? "" : "s"}.`);
+    parts.push(
+      `Could not delete ${num(result.jsonDeleteFailed)} .json ${plural(result.jsonDeleteFailed, "file", "files")}.`,
+    );
   }
   if (parts.length > 0) {
     extra.textContent = parts.join(" ");
