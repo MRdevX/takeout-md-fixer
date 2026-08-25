@@ -38,7 +38,8 @@
     --mono: ui-monospace, Menlo, "SF Mono", monospace;
     --gutter: clamp(20px, 5vw, 44px);
     --topbar: 56px;
-    --content-max: 560px;
+    --content-w: 720px;
+    --content-max: min(var(--content-w), 100%);
 }
 
 html.platform-macos {
@@ -119,7 +120,8 @@ h2 {
     align-items: flex-end;
     justify-content: space-between;
     gap: 12px;
-    padding: 0 var(--gutter) 8px;
+    padding-block: 0 8px;
+    padding-inline: max(var(--gutter), calc((100% - var(--content-w)) / 2));
     background: var(--paper);
     z-index: 20;
     --wails-draggable: drag;
@@ -139,7 +141,7 @@ h2 {
 .view {
     display: none;
     flex: 1;
-    padding: 0 var(--gutter) 48px;
+    padding: 0 var(--gutter) 32px;
 }
 
 .view.active {
@@ -150,30 +152,29 @@ h2 {
 .panel {
     width: 100%;
     max-width: var(--content-max);
-    margin: 0 auto;
-    padding: 26px 0 8px;
+    /* auto margins centre the block and still allow scrolling when it overflows */
+    margin: auto;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: clamp(18px, 2.6vh, 26px);
 }
 
 .panel-center {
     align-items: center;
     text-align: center;
-    gap: 24px;
-    padding-top: 40px;
 }
 
 .welcome {
     width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
+    max-width: var(--content-max);
+    margin: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 16px;
-    padding: 10px 0 24px;
+    gap: clamp(14px, 2.2vh, 20px);
+    padding: 0;
 }
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
@@ -588,8 +589,8 @@ h2 {
 }
 
 .segment {
+    /* fill the content column instead of sitting in a fixed 458px strip */
     flex: 1;
-    max-width: 52px;
     height: 40px;
     border-radius: 6px;
     background: var(--tint);
@@ -686,8 +687,8 @@ h2 {
 /* ── Notices ─────────────────────────────────────────────────────────────── */
 
 .notice {
-    width: 100%;
-    max-width: var(--content-max);
+    width: calc(100% - 2 * var(--gutter));
+    max-width: var(--content-w);
     margin: 8px auto 0;
     padding: 18px 20px;
     border-radius: 16px;
