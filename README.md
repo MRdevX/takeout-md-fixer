@@ -12,19 +12,19 @@ macOS (DMG) and Windows (`.exe`): [GitHub Releases](https://github.com/MRdevX/ta
 
 Pick a folder; the app checks that ExifTool is available.
 
-![Welcome screen with folder selection](https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step1-main.png)
+![Welcome screen with folder selection](docs/screenshots/step1-welcome.png)
 
 Review the summary, then start. You can delete the sidecar JSON after a successful run.
 
-![Review step with statistics](https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step2-review.png)
+![Review step with statistics](docs/screenshots/step2-review.png)
 
 Pause or stop at any point.
 
-![Processing step with progress bar](https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step3-progress.png)
+![Processing step with progress bar](docs/screenshots/step3-progress.png)
 
 You get counts for succeeded, skipped, and failed files.
 
-![Done step with result summary](https://ecuc8c19st5krt52.public.blob.vercel-storage.com/step4-done.png)
+![Done step with result summary](docs/screenshots/step4-done.png)
 
 ## Resuming
 
